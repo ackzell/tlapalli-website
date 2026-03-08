@@ -1,0 +1,18 @@
+body, html {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    --uno: font-serif;
+}
+
+button {
+    --uno: font-mono;
+} 
+
+/* Base dark theme */
+.dark { --bg: #1a1a1a; --text: #f5f5f5; --accent: #7c6af7; }
+
+/* Light theme */
+.light { 
+    --bg: #ffffff; --text: #1a1a1a; --accent: #5b4de0; 
+}

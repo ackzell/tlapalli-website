@@ -1,0 +1,37 @@
+<script setup lang="ts">
+import { useThemeVariant } from '../composables/useThemeVariant'
+
+const colorMode = useColorMode()
+const { setVariant } = useThemeVariant({ defaultVariant: 'obsidian' })
+
+</script>
+
+<template>
+    <div v-if="colorMode.value === 'dark'" flex="~ justify-center gap-2">
+        <button btn-tpl-obsidian @click="setVariant('obsidian')">Obsidian</button>
+        <button btn-tpl-gold @click="setVariant('gold')">Gold</button>
+        <button btn-tpl-turquoise @click="setVariant('turquoise')">Turquoise</button>
+        <button btn-tpl-quartz @click="setVariant('quartz')">Quartz</button>
+        <button btn-tpl-lapis @click="setVariant('lapis')">Lapis</button>
+        <button btn-tpl-amethyst @click="setVariant('amethyst')">Amethyst</button>
+        <button btn-tpl-jade @click="setVariant('jade')">Jade</button>
+        <button btn-tpl-fireOpal @click="setVariant('fireOpal')">Fire Opal</button>
+    </div>
+
+
+    <div v-if="colorMode.value === 'light'" flex="~ justify-center gap-2">
+        <button btn-tpl-obsidian-light @click="setVariant('obsidian')">Obsidian</button>
+        <button btn-tpl-gold-light @click="setVariant('gold')">Gold</button>
+        <button btn-tpl-turquoise-light @click="setVariant('turquoise')">Turquoise</button>
+        <button btn-tpl-quartz-light @click="setVariant('quartz')">Quartz</button>
+        <button btn-tpl-lapis-light @click="setVariant('lapis')">Lapis</button>
+        <button btn-tpl-amethyst-light @click="setVariant('amethyst')">Amethyst</button>
+        <button btn-tpl-jade-light @click="setVariant('jade')">Jade</button>
+        <button btn-tpl-fireOpal-light @click="setVariant('fireOpal')">Fire Opal</button>
+    </div>
+</template>
+
+
+<style scoped>
+
+</style>
