@@ -29,7 +29,7 @@ export default defineConfig({
         presetWind3(),
     ],
     safelist: [
-        ...['obsidian', 'gold', 'turquoise', 'quartz', 'lapis', 'amethyst', 'jade', 'fireOpal']
+        ...['obsidian', 'gold', 'turquoise', 'quartz', 'lapisLazuli', 'amethyst', 'jade', 'fireOpal']
             .flatMap(c => [
                 `border-${c}-900`,
                 `bg-${c}-bg`,
@@ -176,7 +176,7 @@ export default defineConfig({
                 "900": "#381e2e",
                 "950": "#0a0509"
             },
-            "lapis": {
+            "lapisLazuli": {
                 "bg": "#070a0d", // editor.background
                 "foreground": "#3d5f7f", // foreground
 

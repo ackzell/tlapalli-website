@@ -17,13 +17,18 @@ function toggleMode() {
     @click="toggleMode"
   >
   <div
-  text-xl
-  i-mynaui:sun 
-  hover:i-mynaui:sun-solid 
-  dark:i-mynaui:moon 
-  dark:text-white
-  dark:hover:i-mynaui:moon-solid
-  dark:hover:text-white
+    text-xl
+    i-mynaui:sun 
+    hover:i-mynaui:sun-solid 
+    dark:i-mynaui:moon 
+    dark:hover:i-mynaui:moon-solid
   />
   </button>
 </template>
+
+<style scoped>
+button {
+  color: inherit;
+  transition: background-color 220ms ease;
+}
+</style>
