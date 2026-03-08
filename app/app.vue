@@ -24,16 +24,20 @@ const surfaceClass = computed(() => {
       <TplColorModeToggle />
     </div>
 
-    <div flex="~" items-center gap-4 px-4 translate-x-70>
-      <span font-mono>
-        selected:
-      </span>
-      <div>
-        <TplCurrentVariant />
-      </div>
-      <span font-mono>
-        {{ variant }}
-      </span>
+    <div w-full flex="~" items-center justify-center>
+      
+        <div relative flex="~" items-center justify-center>
+          <span font-mono absolute right-40px>
+          selected:
+        </span>
+        <div absolute>
+          <TplCurrentVariant />
+        </div>
+        <span font-mono absolute left-40px>
+          {{ variant }}
+        </span>
+        </div>
+      
     </div>
 
 
@@ -51,3 +55,10 @@ const surfaceClass = computed(() => {
     </div>
   </div>
 </template>
+
+<style scoped>
+.gaaa {
+  width: 300px;
+  left: calc(50% - 150px);
+}
+</style>
