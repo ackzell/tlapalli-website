@@ -1,7 +1,9 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import type { LogoVariant } from '@/models/variants'
+import { onMounted, ref, watch } from 'vue'
 
 const { $anime } = useNuxtApp()
+const { variant, setVariant } = useThemeVariant({ defaultVariant: 'obsidian' })
 
 const logoWidthVw = ref(100)
 const logoBottomVh = ref(12)
@@ -12,6 +14,19 @@ const rotationStepDeg = 360 / 7
 const isRotating = ref(false)
 const pendingRotationSteps = ref(0)
 
+const ringVariants: LogoVariant[] = [
+  'gold',
+  'turquoise',
+  'quartz',
+  'lapisLazuli',
+  'amethyst',
+  'jade',
+  'fireOpal'
+]
+
+const topRingIndex = ref(0)
+const isSyncingFromRotation = ref(false)
+
 const logoRotationState = {
   value: 0
 }
@@ -20,6 +35,25 @@ const logoAnimState = {
   widthVw: 100,
   bottomVh: 1,
   translateYPercent: 0
+}
+
+function mod(value: number, base: number) {
+  return ((value % base) + base) % base
+}
+
+function syncVariantFromTopSlot() {
+  const nextVariant = ringVariants[topRingIndex.value]
+  if (!nextVariant) {
+    return
+  }
+
+  if (variant.value === nextVariant) {
+    return
+  }
+
+  isSyncingFromRotation.value = true
+  setVariant(nextVariant)
+  isSyncingFromRotation.value = false
 }
 
 function rotateMenu(direction: 1 | -1) {
@@ -53,12 +87,52 @@ function runNextRotationStep() {
       logoRotationDeg.value = logoRotationState.value
     },
     complete: () => {
+      topRingIndex.value = mod(topRingIndex.value - direction, ringVariants.length)
+      syncVariantFromTopSlot()
       runNextRotationStep()
     }
   })
 }
 
+function rotateToVariant(nextVariant: LogoVariant) {
+  const targetIndex = ringVariants.indexOf(nextVariant)
+  if (targetIndex < 0) {
+    if (nextVariant === 'obsidian') {
+      setVariant(nextVariant)
+    }
+    return
+  }
+
+  const clockwiseSteps = mod(topRingIndex.value - targetIndex, ringVariants.length)
+  const counterClockwiseSteps = ringVariants.length - clockwiseSteps
+
+  if (clockwiseSteps === 0) {
+    syncVariantFromTopSlot()
+    return
+  }
+
+  const direction: 1 | -1 = clockwiseSteps <= counterClockwiseSteps ? 1 : -1
+  const steps = direction === 1 ? clockwiseSteps : counterClockwiseSteps
+
+  pendingRotationSteps.value += direction * steps
+
+  if (!isRotating.value) {
+    runNextRotationStep()
+  }
+}
+
+watch(variant, (nextVariant) => {
+  if (isSyncingFromRotation.value) {
+    return
+  }
+
+  rotateToVariant(nextVariant)
+})
+
 onMounted(() => {
+  topRingIndex.value = 0
+  syncVariantFromTopSlot()
+
   $anime({
     targets: logoAnimState,
     widthVw: 70,
@@ -104,7 +178,7 @@ onMounted(() => {
     </button>
 
     <div :style="{ transform: `rotate(${logoRotationDeg}deg)` }">
-      <TplLogo class="block w-full h-auto" />
+      <TplLogo class="block w-full h-auto" @select-variant="rotateToVariant" />
     </div>
 
     <button

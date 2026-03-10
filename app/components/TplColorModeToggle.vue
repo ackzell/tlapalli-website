@@ -9,7 +9,6 @@ function toggleMode() {
 
 <template>
   <button
-    p-2
     hover="bg-active"
     bg-transparent
     border-none

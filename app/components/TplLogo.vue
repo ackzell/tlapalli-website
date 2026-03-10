@@ -2,25 +2,28 @@
 import type { LogoVariant } from '@/models/variants'
 
 const colorMode = useColorMode()
-const { setVariant } = useThemeVariant({ defaultVariant: 'obsidian' })
+const { variant } = useThemeVariant({ defaultVariant: 'obsidian' })
 const { logoColor } = useLogoColor()
+const emit = defineEmits<{
+    (event: 'select-variant', variant: LogoVariant): void
+}>()
 
 type Variant = LogoVariant
 
 function selectVariant(variant: Variant) {
-    setVariant(variant)
+    emit('select-variant', variant)
 }
 
 function onGemKeydown(event: KeyboardEvent, variant: Variant) {
     if (event.key === 'Enter' || event.key === ' ') {
         event.preventDefault()
-        setVariant(variant)
+        emit('select-variant', variant)
     }
 }
 </script>
 
 <template>
-    <svg id="svg44547" class="tpl-logo-svg" viewBox="0 0 343.95834 343.95834" version="1.1" xmlns="http://www.w3.org/2000/svg"
+    <svg id="svg44547" class="tpl-logo-svg" viewBox="0 0 344 344" version="1.1" xmlns="http://www.w3.org/2000/svg"
         xmlns:svg="http://www.w3.org/2000/svg">
         <g id="layer1" transform="translate(224.52412,-46.047909)">
             <g id="g45170" transform="translate(22.19,288.814)">
@@ -167,16 +170,17 @@ function onGemKeydown(event: KeyboardEvent, variant: Variant) {
                         transform="matrix(0.3063792,-0.14714148,0.14761148,0.30649573,498.59265,-634.18437)" />
                 </g>
 
-                <!-- OBSIDIAN -->
+                
                 <g id="obsidian-gem">
                     <path id="path37860" :style="{
-                        fill: logoColor('obsidian', 'bg'),
+                        fill: logoColor(variant, 'wbg'),
                         fillOpacity: 1,
-                        stroke: colorMode.value && colorMode.value === 'light' ? '#0d0d0d' : '#fbf1f1',
+                        stroke: logoColor(variant, 'wb'),
                         strokeWidth: 1,
                         strokeDasharray: 'none',
-                        strokeOpacity: 0.15
+                        strokeOpacity: 1
                     }" d="m -138.28767,-201.38037 13.48616,64.67353 -26.74893,32.74726 -65.40941,1.23099 61.58018,31.096306 8.64547,36.979119 -42.14766,54.941317 67.37859,-30.899859 28.362823,13.3350213 17.942894,72.3126257 17.953881,-72.35657 28.310005,-13.310255 67.420729,30.919037 -42.2112734,-55.024053 8.6149903,-36.848838 61.6742161,-31.143851 -65.4935767,-1.23249 -26.6818353,-32.66451 13.503226,-64.75478 -41.766556,50.39799 h -42.647674 z" />
+                    <!-- OBSIDIAN -->
                     <g id="center-gem" class="gem gem-obsidian" role="button" tabindex="0"
                         @click="selectVariant('obsidian')" @keydown="onGemKeydown($event, 'obsidian')">
                         <path id="path37862" :style="{

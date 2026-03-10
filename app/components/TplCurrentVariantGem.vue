@@ -8,7 +8,7 @@ const { logoColor } = useLogoColor()
 
 <template>
     <div id="current-gem" flex="~" items-center gap-2 text-lg font-mono>
-        <svg viewBox="106 108 128 128" version="1.1" xmlns="http://www.w3.org/2000/svg" class="w-16">
+        <svg viewBox="110 110 128 128" version="1.1" xmlns="http://www.w3.org/2000/svg" class="w-16">
             <g id="layer1" transform="translate(224.52412,-46.047909)">
                 <g id="g45170" transform="translate(22.19,288.814)">
                     <g class="current-gem outline-none" tabindex="0">

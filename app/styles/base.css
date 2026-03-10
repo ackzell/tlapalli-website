@@ -5,6 +5,11 @@ body, html {
     --uno: font-serif;
 }
 
+body, html {
+    background-color: var(--bg);
+    color: var(--text);
+}
+
 button {
     --uno: font-mono;
 } 
@@ -15,4 +20,14 @@ button {
 /* Light theme */
 .light { 
     --bg: #ffffff; --text: #1a1a1a; --accent: #5b4de0; 
+}
+
+
+h1 {
+    margin-block-start: 1rem;
+    margin-block-end: 0.5rem;
+}
+
+small {
+    font-size: 0.5em;
 }

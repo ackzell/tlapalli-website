@@ -7,35 +7,42 @@ const colorMode = useColorMode()
 const { variant } = useThemeVariant({ defaultVariant: 'obsidian' })
 
 const surfaceClass = computed(() => {
-  const suffix = colorMode.value === 'light' ? '-l' : ''
-  return `bg-${variant.value}-bg${suffix} text-${variant.value}-foreground${suffix}`
+  const mode = colorMode.value === 'light' ? 'light' : 'dark'
+  return `bg-${variant.value}-${mode}-ui-bg text-${variant.value}-${mode}-ui-foreground`
+})
+
+const borderClass = computed(() => {
+  const mode = colorMode.value === 'light' ? 'light' : 'dark'
+  return `border-${variant.value}-${mode}-ui-border`
 })
 </script>
 <template>
   <div m-0 p-0 min-h-screen :class="surfaceClass"
-    :style="{ transition: 'background-color 260ms ease, color 260ms ease' }" flex="~ col gap-4">
+    :style="{ transition: 'background-color 260ms ease, color 260ms ease' }" 
+    flex="~ col gap-2">
     <TplMenu />
 
 
-    <div px-4 flex="~" items-center justify-between gap-5>
+    <div px-4 flex="~" items-center justify-between
+      border="b-solid b-1"
+      :class="borderClass"
+    >
 
-      <h1>Tlapalli VSCode Theme</h1>
+      <h1>Tlapalli <small font-sans opacity-80>VSCode Theme</small></h1>
 
       <TplColorModeToggle />
     </div>
 
-    <div w-full flex="~" items-center justify-center>
+    <div w-full flex items-center justify-center h-16>
       
         <div relative flex="~" items-center justify-center>
           <span font-mono absolute right-40px>
           selected:
         </span>
         <div absolute>
-          <TplCurrentVariant />
+          <TplCurrentVariantGem />
         </div>
-        <span font-mono absolute left-40px>
-          {{ variant }}
-        </span>
+        <TplCurrentVariantName font-mono absolute left-40px />
         </div>
       
     </div>
@@ -55,10 +62,3 @@ const surfaceClass = computed(() => {
     </div>
   </div>
 </template>
-
-<style scoped>
-.gaaa {
-  width: 300px;
-  left: calc(50% - 150px);
-}
-</style>
