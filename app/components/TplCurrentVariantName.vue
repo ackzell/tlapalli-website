@@ -1,13 +1,40 @@
 <script setup lang="ts">
 import { onBeforeUnmount, ref, watch } from 'vue'
+import { getVariantTypingDurations } from '@/composables/useEditorPreviewTiming'
 
 const { variant } = useThemeVariant({ defaultVariant: 'obsidian' })
 const { $anime } = useNuxtApp()
 
 const displayedVariant = ref<string>(variant.value)
 const isTyping = ref(false)
+const cursorState = ref<'hidden' | 'typing' | 'settling'>('hidden')
+const cursorKey = ref(0)
 
 let variantAnimation: { pause: () => void } | null = null
+let cursorHideTimer: number | undefined
+
+function clearCursorHideTimer() {
+  if (cursorHideTimer) {
+    window.clearTimeout(cursorHideTimer)
+    cursorHideTimer = undefined
+  }
+}
+
+function showTypingCursor() {
+  clearCursorHideTimer()
+  cursorState.value = 'typing'
+  cursorKey.value += 1
+}
+
+function settleCursor() {
+  clearCursorHideTimer()
+  cursorState.value = 'settling'
+  cursorKey.value += 1
+  cursorHideTimer = window.setTimeout(() => {
+    cursorState.value = 'hidden'
+    cursorHideTimer = undefined
+  }, 1680)
+}
 
 function animateVariantText(nextValue: string) {
   if (!import.meta.client) {
@@ -17,14 +44,14 @@ function animateVariantText(nextValue: string) {
 
   isTyping.value = true
   variantAnimation?.pause()
+  showTypingCursor()
 
   const current = displayedVariant.value
   const state = {
     count: current.length
   }
 
-  const removeDuration = Math.max(120, current.length * 36)
-  const typeDuration = Math.max(140, nextValue.length * 52)
+  const { removeDuration, pauseDuration, typeDuration } = getVariantTypingDurations(current, nextValue)
 
   variantAnimation = $anime
     .timeline({ autoplay: true })
@@ -38,7 +65,7 @@ function animateVariantText(nextValue: string) {
       }
     })
     .add({
-      duration: 120
+      duration: pauseDuration
     })
     .add({
       targets: state,
@@ -51,6 +78,7 @@ function animateVariantText(nextValue: string) {
       complete: () => {
         displayedVariant.value = nextValue
         isTyping.value = false
+        settleCursor()
       }
     })
 }
@@ -65,16 +93,26 @@ watch(variant, (nextValue) => {
 })
 
 onBeforeUnmount(() => {
+  clearCursorHideTimer()
   variantAnimation?.pause()
   variantAnimation = null
   isTyping.value = false
+  cursorState.value = 'hidden'
 })
 </script>
 
 <template>
   <span class="variant-value">
     <span>{{ displayedVariant }}</span>
-    <span class="type-cursor" :class="{ 'type-cursor-typing': isTyping }">█</span>
+    <span
+      :key="cursorKey"
+      class="type-cursor"
+      :class="{
+        'type-cursor-typing': cursorState === 'typing',
+        'type-cursor-settling': cursorState === 'settling',
+        'type-cursor-hidden': cursorState === 'hidden',
+      }"
+    >█</span>
   </span>
 </template>
 
@@ -86,11 +124,20 @@ onBeforeUnmount(() => {
   vertical-align: baseline;
   transform: translateY(-0.02em);
   font-size: 1.2rem;
-  animation: cursor-phase 1100ms ease-in-out infinite;
+  opacity: 0;
 }
 
 .type-cursor-typing {
   animation: cursor-phase 520ms ease-in-out infinite;
+}
+
+.type-cursor-settling {
+  animation: cursor-phase 560ms ease-in-out 3;
+}
+
+.type-cursor-hidden {
+  animation: none;
+  opacity: 0;
 }
 
 .variant-value {

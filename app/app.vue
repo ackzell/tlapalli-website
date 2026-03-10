@@ -15,21 +15,22 @@ const borderClass = computed(() => {
   const mode = colorMode.value === 'light' ? 'light' : 'dark'
   return `border-${variant.value}-${mode}-ui-border`
 })
+
 </script>
 <template>
-  <div m-0 p-0 min-h-screen :class="surfaceClass"
+  <div
+m-0 p-0 min-h-screen :class="surfaceClass"
     :style="{ transition: 'background-color 260ms ease, color 260ms ease' }" 
     flex="~ col gap-2">
     <TplMenu />
 
 
-    <div px-4 flex="~" items-center justify-between
+    <div
+      px-4 flex="~" items-center justify-between
       border="b-solid b-1"
       :class="borderClass"
     >
-
       <h1>Tlapalli <small font-sans opacity-80>VSCode Theme</small></h1>
-
       <TplColorModeToggle />
     </div>
 
@@ -48,10 +49,17 @@ const borderClass = computed(() => {
     </div>
 
 
-
-    <p>Color in Náhuatl</p>
-    <p>Color in Náhuatl</p>
-    <p>Color in Náhuatl</p>
+    <div
+        m-auto p-4
+        w="sm:70vw md:80vw" 
+        rounded-lg
+        flex items-center justify-center
+        border-solid
+        :class="borderClass"
+      >
+      <TplEditorPreview />
+    </div>
+    
 
 
     <!-- <TplThemeSwitcher/> -->

@@ -157,7 +157,7 @@ onMounted(() => {
       left: '50%',
       bottom: `${logoBottomVh}vh`,
       width: `${logoWidthVw}vw`,
-      maxWidth: '400px',
+      maxWidth: '300px',
       transform: `translate(-50%, ${logoTranslateYPercent}%)`,
       zIndex: 20
     }"
