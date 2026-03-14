@@ -37,10 +37,14 @@ export default defineConfig({
                 `bg-${c}-dark-ui-bg`,
                 `text-${c}-dark-ui-foreground`,
                 `border-${c}-dark-ui-border`,
+                `selection:bg-${c}-dark-logo-fg`,
+                `selection:text-${c}-dark-logo-bg`,
 
                 `bg-${c}-light-ui-bg`,
                 `text-${c}-light-ui-foreground`,
                 `border-${c}-light-ui-border`,
+                `selection:bg-${c}-light-logo-fg`,
+                `selection:text-${c}-light-logo-bg`,
             ])
     ],
     shortcuts: [

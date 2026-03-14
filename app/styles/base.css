@@ -3,12 +3,10 @@ body, html {
     padding: 0;
     min-height: 100vh;
     --uno: font-serif;
+
+    color-scheme: dark light;
 }
 
-body, html {
-    background-color: var(--bg);
-    color: var(--text);
-}
 
 button {
     --uno: font-mono;
@@ -23,9 +21,10 @@ button {
 }
 
 
-h1 {
+h1, h2, h3, h4, h5, h6 {
     margin-block-start: 1rem;
     margin-block-end: 0.5rem;
+    --uno: font-sans text-3xl;
 }
 
 small {

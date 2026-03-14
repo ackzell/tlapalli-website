@@ -180,6 +180,7 @@ onBeforeUnmount(() => {
 .preview-frame {
   position: relative;
   width: 100%;
+  max-width: 100%;
   overflow: hidden;
 }
 
@@ -199,6 +200,7 @@ onBeforeUnmount(() => {
 .preview-image {
   display: block;
   width: 100%;
+  max-width: 100%;
   height: auto;
 }
 </style>

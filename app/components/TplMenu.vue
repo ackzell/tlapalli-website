@@ -130,8 +130,8 @@ watch(variant, (nextVariant) => {
 })
 
 onMounted(() => {
-  topRingIndex.value = 0
-  syncVariantFromTopSlot()
+  const savedIndex = ringVariants.indexOf(variant.value)
+  topRingIndex.value = savedIndex >= 0 ? savedIndex : 0
 
   $anime({
     targets: logoAnimState,
