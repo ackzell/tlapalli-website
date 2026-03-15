@@ -25,7 +25,7 @@ const ringVariants: LogoVariant[] = [
 ]
 
 const topRingIndex = ref(0)
-const isSyncingFromRotation = ref(false)
+const variantSyncedFromRotation = ref<LogoVariant | null>(null)
 
 const logoRotationState = {
   value: 0
@@ -51,9 +51,8 @@ function syncVariantFromTopSlot() {
     return
   }
 
-  isSyncingFromRotation.value = true
+  variantSyncedFromRotation.value = nextVariant
   setVariant(nextVariant)
-  isSyncingFromRotation.value = false
 }
 
 function rotateMenu(direction: 1 | -1) {
@@ -122,7 +121,8 @@ function rotateToVariant(nextVariant: LogoVariant) {
 }
 
 watch(variant, (nextVariant) => {
-  if (isSyncingFromRotation.value) {
+  if (variantSyncedFromRotation.value === nextVariant) {
+    variantSyncedFromRotation.value = null
     return
   }
 
@@ -132,6 +132,9 @@ watch(variant, (nextVariant) => {
 onMounted(() => {
   const savedIndex = ringVariants.indexOf(variant.value)
   topRingIndex.value = savedIndex >= 0 ? savedIndex : 0
+  const startingRotation = -topRingIndex.value * rotationStepDeg
+  logoRotationState.value = startingRotation
+  logoRotationDeg.value = startingRotation
 
   $anime({
     targets: logoAnimState,

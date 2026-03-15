@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { onBeforeUnmount, ref, watch } from 'vue'
-import { getVariantTypingDurations } from '@/composables/useEditorPreviewTiming'
+import { useVariantSwitchTimeline } from '@/composables/useVariantSwitchTimeline'
 
 const { variant } = useThemeVariant({ defaultVariant: 'obsidian' })
+const { switchToken, toVariant, phaseDurations } = useVariantSwitchTimeline()
 const { $anime } = useNuxtApp()
 
 const displayedVariant = ref<string>(variant.value)
@@ -51,7 +52,7 @@ function animateVariantText(nextValue: string) {
     count: current.length
   }
 
-  const { removeDuration, pauseDuration, typeDuration } = getVariantTypingDurations(current, nextValue)
+  const { removeDuration, pauseDuration, typeDuration } = phaseDurations.value
 
   variantAnimation = $anime
     .timeline({ autoplay: true })
@@ -83,7 +84,9 @@ function animateVariantText(nextValue: string) {
     })
 }
 
-watch(variant, (nextValue) => {
+watch(switchToken, () => {
+  const nextValue = toVariant.value
+
   if (!import.meta.client) {
     displayedVariant.value = nextValue
     return
