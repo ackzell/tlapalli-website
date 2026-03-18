@@ -1,11 +1,11 @@
 import { themePalette, type LogoShade, type LogoVariant } from "~/models/variants"
 
 export function useLogoColor() {
-    const colorMode = useColorMode()
+    const { resolvedMode } = useResolvedColorMode()
     const logoPalette = themePalette
 
     const logoColor = (variant: LogoVariant, shade: LogoShade) => {
-        const mode = colorMode.value === 'light' ? 'light' : 'dark'
+        const mode = resolvedMode.value === 'Light' ? 'light' : 'dark'
         return logoPalette[variant][mode].logo[shade]
     }
 

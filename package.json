@@ -5,6 +5,8 @@
   "scripts": {
     "build": "nuxt build",
     "dev": "nuxt dev",
+    "dev:network": "nuxt dev --host 0.0.0.0 --port 3000",
+    "dev:mobile": "NUXT_DEVTOOLS=false nuxt dev --host 0.0.0.0 --port 3000",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare"
@@ -12,6 +14,7 @@
   "dependencies": {
     "@hypernym/nuxt-anime": "2.1.1",
     "@iconify-json/mynaui": "^1.2.17",
+    "@iconify-json/ph": "^1.2.2",
     "@nuxt/a11y": "1.0.0-alpha.1",
     "@nuxt/eslint": "1.15.2",
     "@nuxt/fonts": "0.14.0",
@@ -27,7 +30,8 @@
     "@vueuse/nuxt": "14.2.1",
     "nuxt": "^4.3.1",
     "vue": "^3.5.29",
-    "vue-router": "^4.6.4"
+    "vue-router": "^4.6.4",
+    "web-haptics": "^0.0.6"
   },
   "devDependencies": {
     "unocss": "^66.6.6"

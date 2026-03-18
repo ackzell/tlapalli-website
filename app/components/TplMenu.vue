@@ -1,9 +1,13 @@
 <script setup lang="ts">
 import type { LogoVariant } from '@/models/variants'
 import { onMounted, ref, watch } from 'vue'
+import { useWebHaptics } from 'web-haptics/vue'
 
 const { $anime } = useNuxtApp()
 const { variant, setVariant } = useThemeVariant({ defaultVariant: 'obsidian' })
+
+const { trigger } = useWebHaptics();
+
 
 const logoWidthVw = ref(100)
 const logoBottomVh = ref(12)
@@ -169,7 +173,7 @@ onMounted(() => {
       type="button"
       class="logo-rotate-button logo-rotate-button-left"
       aria-label="Rotate menu left"
-      @click="rotateMenu(-1)"
+      @click="trigger(); rotateMenu(-1);"
     >
       <div
         i-mynaui:fat-corner-left-down
@@ -188,7 +192,7 @@ onMounted(() => {
       type="button"
       class="logo-rotate-button logo-rotate-button-right"
       aria-label="Rotate menu right"
-      @click="rotateMenu(1)"
+      @click="trigger(); rotateMenu(1);"
     >
       <div
         i-mynaui:fat-corner-right-down

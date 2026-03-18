@@ -14,8 +14,8 @@ const props = withDefaults(defineProps<{
   syncStartedAt?: number
   syncDuration?: number
 }>(), {
-  sizes: 'sm:70vw md:80vw',
-  densities: 'x1 x3',
+  sizes: '100vw',
+  densities: 'x1 x2',
   baseDuration: EDITOR_PREVIEW_REVEAL_DURATION,
   easing: 'easeInOutCubic',
   syncToken: 0,

@@ -1,8 +1,45 @@
 <script lang="ts" setup>
-const colorMode = useColorMode()
+import { computed } from 'vue'
+import { useResolvedColorMode } from '@/composables/useResolvedColorMode'
+
+const { resolvedMode, preference } = useResolvedColorMode()
+
+const iconClass = computed(() => {
+  if (preference.value === 'light') {
+    return 'i-mynaui:sun hover:i-mynaui:sun-solid'
+  }
+
+  if (preference.value === 'dark') {
+    return 'i-mynaui:moon hover:i-mynaui:moon-solid'
+  }
+
+  return 'i-ph:monitor'
+})
+
+const buttonLabel = computed(() => {
+  if (preference.value === 'light') {
+    return 'Color mode: Light. Click to switch to Dark'
+  }
+
+  if (preference.value === 'dark') {
+    return 'Color mode: Dark. Click to switch to Auto'
+  }
+
+  return `Color mode: Auto (System, currently ${resolvedMode.value}). Click to switch to Light`
+})
 
 function toggleMode() {
-  colorMode.preference = colorMode.value === 'light' ? 'dark' : 'light'
+  if (preference.value === 'system') {
+    preference.value = 'light'
+    return
+  }
+
+  if (preference.value === 'light') {
+    preference.value = 'dark'
+    return
+  }
+
+  preference.value = 'system'
 }
 
 </script>
@@ -13,14 +50,17 @@ function toggleMode() {
     bg-transparent
     border-none
     cursor-pointer
+    p-2
+    relative
+    z-20
+    touch-manipulation
+    :aria-label="buttonLabel"
+    :title="buttonLabel"
     @click="toggleMode"
   >
   <div
     text-xl
-    i-mynaui:sun 
-    hover:i-mynaui:sun-solid 
-    dark:i-mynaui:moon 
-    dark:hover:i-mynaui:moon-solid
+    :class="iconClass"
   />
   </button>
 </template>

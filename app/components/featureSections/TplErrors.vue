@@ -4,9 +4,6 @@ import TplVariantModeImageSwap from '@/components/shared/TplVariantModeImageSwap
 
         
 <template>
-  <div flex items-center justify-center py-16 gap-12 flex-wrap>
-
-    
 
       <section max-w-md>
         <h2>Errors won't be too distracting</h2>
@@ -26,12 +23,11 @@ import TplVariantModeImageSwap from '@/components/shared/TplVariantModeImageSwap
           <TplVariantModeImageSwap
           image-section="errors"
           alt="Preview of error styling for the selected theme variant."
-          sizes="sm:40vw"
-          densities="x1 x3"
+          sizes="100vw sm:60vw md:70vw lg:50vw xl:720px"
         />
       </div>
 
-    </div>
+    
 </template>
 
 
@@ -43,13 +39,19 @@ em {
 }
 
 .errors-preview-shell {
-  width: min(40vw, 720px);
+  width: min(100%, 720px);
+  max-width: 100%;
   min-width: 320px;
-  aspect-ratio: 2045 / 1530;
-  flex: 0 0 auto;
-  transform: perspective(1200px) rotateX(45deg) rotateY(18deg) rotate(-18deg);
+  flex: 1 1 320px;
+  /* aspect-ratio: 2045 / 1530; */
+  /* flex: 0 0 auto; */
+  /* transform: perspective(1200px) rotateX(45deg) rotateY(18deg) rotate(-18deg); */
   transform-origin: center center;
-  will-change: transform;
+  will-change: transform, mask-image, -webkit-mask-image;
+ 
+  -webkit-mask-image: linear-gradient(to top, transparent 5%, black 60%);
+  mask-image: linear-gradient(to top, transparent 5%, black 60%);
+
 }
 
 </style>

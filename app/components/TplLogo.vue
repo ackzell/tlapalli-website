@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import type { LogoVariant } from '@/models/variants'
+import { useWebHaptics } from 'web-haptics/vue'
+
+const { trigger } = useWebHaptics();
 
 const { variant } = useThemeVariant({ defaultVariant: 'obsidian' })
 const { logoColor } = useLogoColor()
@@ -30,7 +33,7 @@ id="svg44547" class="tpl-logo-svg" viewBox="0 0 344 344" version="1.1" xmlns="ht
                 <!-- lapisLazuli -->
                 <g
 id="g47482" class="gem gem-lapisLazuli" role="button" tabindex="0"
-                    @click="selectVariant('lapisLazuli')" @keydown="onGemKeydown($event, 'lapisLazuli')">
+                    @click="trigger(); selectVariant('lapisLazuli')" @keydown="onGemKeydown($event, 'lapisLazuli')">
                     <path
 id="path37818"
                         :style="{ fill: logoColor('lapisLazuli', 'bg'), fillOpacity: 1, stroke: logoColor('lapisLazuli', 'fg'), strokeWidth: 2.78701, strokeDasharray: 'none', strokeDashoffset: 0, strokeOpacity: 1, paintOrder: 'normal' }"
@@ -51,7 +54,7 @@ id="path37822"
                 <!-- Amethyst -->
                 <g
 id="amethyst-gem" class="gem gem-amethyst" role="button" tabindex="0"
-                    @click="selectVariant('amethyst')" @keydown="onGemKeydown($event, 'amethyst')">
+                    @click="trigger(); selectVariant('amethyst')" @keydown="onGemKeydown($event, 'amethyst')">
                     <path
 id="path37824"
                         :style="{ fill: logoColor('amethyst', 'bg'), fillOpacity: 1, stroke: logoColor('amethyst', 'fg'), strokeWidth: 2.78701, strokeDasharray: 'none', strokeDashoffset: 0, strokeOpacity: 1, paintOrder: 'normal' }"
@@ -71,7 +74,7 @@ id="path37828"
 
                 <!-- gold -->
                 <g
-id="gold-gem" class="gem gem-gold" role="button" tabindex="0" @click="selectVariant('gold')"
+id="gold-gem" class="gem gem-gold" role="button" tabindex="0" @click="trigger(); selectVariant('gold')"
                     @keydown="onGemKeydown($event, 'gold')">
                     <path
 id="path37830" :style="{
@@ -109,7 +112,7 @@ id="path37834" :style="{
                 <!-- Turquoise -->
                 <g
 id="turquoise-gem" class="gem gem-turquoise" role="button" tabindex="0"
-                    @click="selectVariant('turquoise')" @keydown="onGemKeydown($event, 'turquoise')">
+                    @click="trigger(); selectVariant('turquoise')" @keydown="onGemKeydown($event, 'turquoise')">
                     <path
 id="path37836"
                         :style="{ fill: logoColor('turquoise', 'bg'), fillOpacity: 1, stroke: logoColor('turquoise', 'fg'), strokeWidth: 2.78701, strokeDasharray: 'none', strokeDashoffset: 0, strokeOpacity: 1, paintOrder: 'normal' }"
@@ -129,7 +132,7 @@ id="path37840"
 
                 <!-- quartz -->
                 <g
-id="quartz-gem" class="gem gem-quartz" role="button" tabindex="0" @click="selectVariant('quartz')"
+id="quartz-gem" class="gem gem-quartz" role="button" tabindex="0" @click="trigger(); selectVariant('quartz')"
                     @keydown="onGemKeydown($event, 'quartz')">
                     <path
 id="path37842"
@@ -150,7 +153,7 @@ id="path37846"
 
                 <!-- jade -->
                 <g
-id="jade-gem" class="gem gem-jade" role="button" tabindex="0" @click="selectVariant('jade')"
+id="jade-gem" class="gem gem-jade" role="button" tabindex="0" @click="trigger(); selectVariant('jade')"
                     @keydown="onGemKeydown($event, 'jade')">
                     <path
 id="path37848" :style="{
@@ -179,7 +182,7 @@ id="path37852"
                 <!-- fire opal -->
                 <g
 id="fireopal-gem" class="gem gem-fireopal" role="button" tabindex="0"
-                    @click="selectVariant('fireOpal')" @keydown="onGemKeydown($event, 'fireOpal')">
+                    @click="trigger(); selectVariant('fireOpal')" @keydown="onGemKeydown($event, 'fireOpal')">
                     <path
 id="path37854"
                         :style="{ fill: logoColor('fireOpal', 'bg'), fillOpacity: 1, stroke: logoColor('fireOpal', 'fg'), strokeWidth: 2.78701, strokeDasharray: 'none', strokeDashoffset: 0, strokeOpacity: 1, paintOrder: 'normal' }"
@@ -212,7 +215,7 @@ id="path37860" :style="{
                     <!-- OBSIDIAN -->
                     <g
 id="center-gem" class="gem gem-obsidian" role="button" tabindex="0"
-                        @click="selectVariant('obsidian')" @keydown="onGemKeydown($event, 'obsidian')">
+                        @click="trigger(); selectVariant('obsidian')" @keydown="onGemKeydown($event, 'obsidian')">
                         <path
 id="path37862" :style="{
                             fill: logoColor('obsidian', 'bg'),

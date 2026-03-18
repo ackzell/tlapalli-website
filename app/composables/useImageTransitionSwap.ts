@@ -3,6 +3,7 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref, toValue, watch } f
 import { EDITOR_PREVIEW_REVEAL_DURATION } from '@/composables/useEditorPreviewTiming'
 
 const CLIP_HIDDEN = 'polygon(50% 50%, 50% 50%, 50% 50%, 50% 50%)'
+const CLIP_VISIBLE = 'polygon(50% -90%, 260% 50%, 50% 190%, -160% 50%)'
 
 type UseImageTransitionSwapOptions = {
   source: MaybeRefOrGetter<string>
@@ -73,6 +74,8 @@ export function useImageTransitionSwap(options: UseImageTransitionSwapOptions) {
 
   const animateSwap = (incomingIndex: 0 | 1, duration: number, token: number) => {
     const incomingLayer = layerRefs[incomingIndex].value
+    const outgoingIndex: 0 | 1 = incomingIndex === 0 ? 1 : 0
+    const outgoingLayer = layerRefs[outgoingIndex].value
 
     if (!incomingLayer) {
       return
@@ -84,8 +87,15 @@ export function useImageTransitionSwap(options: UseImageTransitionSwapOptions) {
     }
 
     $anime.remove(incomingLayer)
+    if (outgoingLayer) {
+      $anime.remove(outgoingLayer)
+    }
 
     incomingLayer.style.clipPath = CLIP_HIDDEN
+    incomingLayer.style.zIndex = '2'
+    if (outgoingLayer) {
+      outgoingLayer.style.zIndex = '1'
+    }
 
     const morphState = { t: 0 }
     $anime({
@@ -104,22 +114,17 @@ export function useImageTransitionSwap(options: UseImageTransitionSwapOptions) {
           return
         }
 
-        layerSrcs.value[0] = layerSrcs.value[incomingIndex]
-        waitForLayerImage(0).then(() => {
-          if (token !== swapToken) {
-            return
-          }
-
-          const layer0 = layerRefs[0].value
-          const layer1 = layerRefs[1].value
-          if (layer0) {
-            layer0.style.clipPath = 'none'
-          }
-          if (layer1) {
-            layer1.style.clipPath = CLIP_HIDDEN
-          }
-          activeLayer.value = 0
-        })
+        const incoming = layerRefs[incomingIndex].value
+        const outgoing = layerRefs[outgoingIndex].value
+        if (incoming) {
+          incoming.style.clipPath = CLIP_VISIBLE
+          incoming.style.zIndex = '2'
+        }
+        if (outgoing) {
+          outgoing.style.clipPath = CLIP_HIDDEN
+          outgoing.style.zIndex = '1'
+        }
+        activeLayer.value = incomingIndex
       },
     })
 
@@ -158,6 +163,13 @@ export function useImageTransitionSwap(options: UseImageTransitionSwapOptions) {
     const layer1 = layerRefs[1].value
     if (layer1) {
       layer1.style.clipPath = CLIP_HIDDEN
+      layer1.style.zIndex = '1'
+    }
+
+    const layer0 = layerRefs[0].value
+    if (layer0) {
+      layer0.style.clipPath = CLIP_VISIBLE
+      layer0.style.zIndex = '2'
     }
   })
 

@@ -12,8 +12,8 @@ const props = withDefaults(defineProps<{
   densities?: string
 }>(), {
   alt: undefined,
-  sizes: 'sm:70vw md:80vw',
-  densities: 'x1 x3',
+  sizes: '(max-width: 640px) 100vw, (max-width: 768px) 60vw, 70vw',
+  densities: 'x1 x2',
 })
 
 const { variant } = useThemeVariant({ defaultVariant: 'obsidian' })
@@ -36,11 +36,11 @@ const resolvedAlt = computed(() => props.alt
     :sync-started-at="switchStartedAt"
     :sync-duration="totalDuration"
   >
-    <template #image="{ src, alt }">
-      <slot name="image" :src="src" :alt="alt">
+    <template #image="{ src, alt: imageAlt }">
+      <slot name="image" :src="src" :alt="imageAlt">
         <NuxtImg
           :src="src"
-          :alt="alt"
+          :alt="imageAlt"
           class="preview-image"
           :sizes="sizes"
           :densities="densities"
