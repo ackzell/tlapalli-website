@@ -34,12 +34,19 @@ export default defineConfig({
     safelist: [
         ...themeVariantNames
             .flatMap(c => [
+                `bg-${c}-dark-ui-widgetBg/60`,
+                `hover:bg-${c}-dark-ui-widgetHoverBg`,
+                `hover:text-${c}-dark-ui-widgetHoverForeground`,
+
                 `bg-${c}-dark-ui-bg`,
                 `text-${c}-dark-ui-foreground`,
                 `border-${c}-dark-ui-border`,
                 `selection:bg-${c}-dark-logo-fg`,
                 `selection:text-${c}-dark-logo-bg`,
 
+                `bg-${c}-light-ui-widgetBg/60`,
+                `hover:bg-${c}-light-ui-widgetHoverBg`,
+                `hover:text-${c}-light-ui-widgetHoverForeground`,
                 `bg-${c}-light-ui-bg`,
                 `text-${c}-light-ui-foreground`,
                 `border-${c}-light-ui-border`,
