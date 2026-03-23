@@ -1,289 +1,258 @@
 <script setup lang="ts">
 import type { LogoVariant } from '@/models/variants'
 import { useWebHaptics } from 'web-haptics/vue'
+import { computed } from 'vue'
 
-const { trigger } = useWebHaptics();
-
+const { trigger } = useWebHaptics()
 const { variant } = useThemeVariant({ defaultVariant: 'obsidian' })
 const { logoColor } = useLogoColor()
+
 const emit = defineEmits<{
-    (event: 'select-variant', variant: LogoVariant): void
+  (event: 'select-variant', variant: LogoVariant): void
 }>()
 
-type Variant = LogoVariant
-
-function selectVariant(variant: Variant) {
-    emit('select-variant', variant)
+function selectVariant(v: LogoVariant) {
+  emit('select-variant', v)
 }
 
-function onGemKeydown(event: KeyboardEvent, variant: Variant) {
-    if (event.key === 'Enter' || event.key === ' ') {
-        event.preventDefault()
-        emit('select-variant', variant)
-    }
+function onGemKeydown(event: KeyboardEvent, v: LogoVariant) {
+  if (event.key === 'Enter' || event.key === ' ') {
+    event.preventDefault()
+    emit('select-variant', v)
+  }
 }
+
+function toPolygon(points: string, size = 344): string {
+  return points.split(' ').map(pair => {
+    const [x, y] = pair.split(',').map(Number) 
+    return x && y && `${((x / size) * 100).toFixed(3)}% ${((y / size) * 100).toFixed(3)}%`
+  }).join(', ')
+}
+
+interface GemDef {
+  id: string
+  variant: LogoVariant
+  outer: string
+  facet: string
+  highlight: string
+  outerStrokeWidth: number
+}
+
+const satelliteGems: GemDef[] = [
+  { id: 'gem-lapisLazuli', variant: 'lapisLazuli',
+    outer:     '231.1,296.3 201.4,296.3 182.9,273.1 189.5,244.1 216.2,231.2 243,244.1 249.6,273.1',
+    highlight: '227.5,288.8 205,288.8 191,271.3 196,249.4 216.2,239.6 236.5,249.3 241.5,271.2',
+    facet:     '216.2,286.2 205.1,288.8 200.1,278.4 191.1,271.3 196.1,260.9 196.1,249.5 207.3,246.9 216.2,239.8 225.2,246.9 236.4,249.5 236.4,261 241.4,271.3 232.4,278.5 227.4,288.8',
+    outerStrokeWidth: 1.2 },
+  { id: 'gem-amethyst', variant: 'amethyst',
+    outer:     '112.1,296.4 93.6,273.2 100.2,244.2 126.9,231.3 153.7,244.2 160.3,273.1 141.8,296.4',
+    highlight: '115.7,288.9 101.7,271.3 106.7,249.4 126.9,239.6 147.2,249.4 152.2,271.3 138.2,288.8',
+    facet:     '110.7,278.5 101.8,271.3 106.8,261 106.8,249.5 118,246.9 126.9,239.8 135.9,247 147,249.5 147,261 152,271.3 143,278.5 138.1,288.8 126.9,286.3 115.7,288.8',
+    outerStrokeWidth: 1.2 },
+  { id: 'gem-gold', variant: 'gold',
+    outer:     '171.5,35.6 198.3,48.5 204.9,77.5 186.4,100.7 156.7,100.7 138.2,77.5 144.8,48.5',
+    highlight: '171.5,44 191.8,53.7 196.8,75.6 182.8,93.2 160.3,93.2 146.3,75.6 151.3,53.7',
+    facet:     '180.6,51.1 191.7,53.7 191.7,65.2 196.7,75.5 187.7,82.7 182.7,93 171.5,90.5 160.4,93 155.4,82.6 146.5,75.5 151.4,65.1 151.4,53.7 162.6,51.1 171.6,44',
+    outerStrokeWidth: 1.2 },
+  { id: 'gem-turquoise', variant: 'turquoise',
+    outer:     '278.8,87.2 285.4,116.2 266.9,139.4 237.2,139.4 218.6,116.2 225.2,87.2 252,74.3',
+    highlight: '272.2,92.4 277.2,114.3 263.2,131.9 240.8,131.9 226.8,114.3 231.8,92.4 252,82.7',
+    facet:     '272.2,104 277.2,114.3 268.2,121.4 263.2,131.8 252,129.2 240.9,131.8 235.9,121.4 226.9,114.3 231.9,103.9 231.9,92.5 243.1,89.9 252.1,82.8 261.1,89.9 272.2,92.5',
+    outerStrokeWidth: 1.2 },
+  { id: 'gem-quartz', variant: 'quartz',
+    outer:     '305.3,203.3 286.8,226.5 257.1,226.5 238.5,203.3 245.1,174.3 271.9,161.4 298.7,174.3',
+    highlight: '297.1,201.4 283.1,219 260.7,219 246.7,201.4 251.7,179.5 271.9,169.8 292.1,179.5',
+    facet:     '288.1,208.6 283.2,218.9 271.9,216.3 260.8,218.9 255.8,208.5 246.8,201.4 251.8,191.1 251.8,179.6 263,177.1 272,169.9 280.9,177.1 292.1,179.6 292.1,191.1 297.1,201.4',
+    outerStrokeWidth: 1.2 },
+  { id: 'gem-jade', variant: 'jade',
+    outer:     '37.8,203.4 44.4,174.4 71.2,161.5 98,174.4 104.6,203.3 86.1,226.6 56.4,226.6',
+    highlight: '46,201.5 51,179.6 71.2,169.9 91.4,179.6 96.5,201.5 82.5,219.1 60,219.1',
+    facet:     '51,191.1 51,179.7 62.2,177.1 71.1,170 80.1,177.1 91.3,179.7 91.3,191.1 96.3,201.5 87.3,208.6 82.3,218.9 71.1,216.4 60,218.9 55,208.6 46,201.5',
+    outerStrokeWidth: 1.2 },
+  { id: 'gem-fireOpal', variant: 'fireOpal',
+    outer:     '64.2,87.3 91,74.4 117.8,87.3 124.4,116.3 105.9,139.5 76.2,139.5 57.6,116.3',
+    highlight: '70.8,92.5 91,82.8 111.2,92.5 116.3,114.4 102.3,132 79.8,132 65.8,114.4',
+    facet:     '82,90 90.9,82.8 99.9,90 111.1,92.5 111.1,104 116.1,114.3 107.1,121.5 102.2,131.8 91,129.3 79.8,131.8 74.8,121.5 65.9,114.3 70.8,104 70.8,92.5',
+    outerStrokeWidth: 1.2 },
+]
+
+const obsidian = {
+  id: 'gem-obsidian',
+  variant: 'obsidian' as LogoVariant,
+  outer:     '172,227.2 216.2,206.4 227.1,159.7 196.5,122.2 147.5,122.2 116.9,159.7 127.8,206.4',
+  highlight: '172,213.7 205.4,198 213.7,162.7 190.6,134.4 153.4,134.4 130.3,162.7 138.6,198',
+  facet:     '187.2,202.5 205.5,198 205.9,179.5 213.7,162.7 199.2,150.9 190.6,134.5 172.1,138.2 153.6,134.5 145,151 130.6,162.8 138.4,179.6 138.9,198.1 157.2,202.6 172.2,213.7',
+  outerStrokeWidth: 1.2,
+}
+
+const STAR_PATH = 'm -138.2877,-201.38045 13.486,64.67357 -26.74876,32.74693 -65.4093,1.23103 61.58072,31.09631 8.64558,36.97912 -42.14782,54.94132 67.3782,-30.89986 28.3634,13.33502 17.94249,72.31263 17.95388,-72.35657 28.31001,-13.31026 67.42073,30.91904 -42.21127,-55.02405 8.61499,-36.84884 61.67422,-31.14385 -65.49358,-1.23249 -26.68184,-32.66451 13.50323,-64.75478 -41.76656,50.39799 h -42.64767 z m 39.00802,80.33773 48.08589,0 30.60433,37.46696 -10.92285,46.72067 -44.22469,20.79305 -44.22469,-20.79305 -10.92285,-46.72067 z'
+const currentGem = computed(() => satelliteGems.find(g => g.variant === variant.value) || obsidian)
 </script>
 
 <template>
+  <div class="logo-wrapper">
+
+    <!-- Frosted glass layer: one div per gem, clipped to gem shape via CSS polygon() -->
+    <div class="gem-backdrops" aria-hidden="true">
+      <div
+        v-if="variant"
+        :key="`frost-${variant}`"
+        class="gem-frost"
+        :class="`${$colorMode.value}-frost`"
+        :style="{
+          clipPath: `polygon(${toPolygon(currentGem.outer)})`,
+        }"
+      />
+
+      <div
+        v-if="variant"
+        :key="`frost-${variant}`"
+        class="gem-frost"
+        :class="`${$colorMode.value}-frost`"
+        :style="{
+          clipPath: `polygon(${toPolygon(currentGem.highlight)})`,
+        }"
+      />
+    </div>
+
     <svg
-id="svg44547" class="tpl-logo-svg" viewBox="0 0 344 344" version="1.1" xmlns="http://www.w3.org/2000/svg"
-        xmlns:svg="http://www.w3.org/2000/svg">
-        <g id="layer1" transform="translate(224.52412,-46.047909)">
-            <g id="g45170" transform="translate(22.19,288.814)">
-                <!-- lapisLazuli -->
-                <g
-id="g47482" class="gem gem-lapisLazuli" role="button" tabindex="0"
-                    @click="trigger(); selectVariant('lapisLazuli')" @keydown="onGemKeydown($event, 'lapisLazuli')">
-                    <path
-id="path37818"
-                        :style="{ fill: logoColor('lapisLazuli', 'bg'), fillOpacity: 1, stroke: logoColor('lapisLazuli', 'fg'), strokeWidth: 2.78701, strokeDasharray: 'none', strokeDashoffset: 0, strokeOpacity: 1, paintOrder: 'normal' }"
-                        d="m -2372.2505,406.59142 65.8811,31.72668 16.2713,71.28919 -45.5911,57.16949 -73.1226,0 -45.5911,-57.16949 16.2713,-71.28919 z"
-                        transform="matrix(-0.36604391,0.17647988,-0.17647988,-0.36604391,-812.21096,620.52509)" />
-                    <path
-id="path37820"
-                        :style="{ fill: logoColor('lapisLazuli', 'fg'), fillOpacity: 1, stroke: 'none', strokeWidth: 0.264583, strokeDasharray: 'none', strokeDashoffset: 0, strokeOpacity: 1, paintOrder: 'normal' }"
-                        d="m -2372.2505,406.59142 65.8811,31.72668 16.2713,71.28919 -45.5911,57.16949 -73.1226,0 -45.5911,-57.16949 16.2713,-71.28919 z"
-                        transform="matrix(-0.27671771,0.13341325,-0.13341325,-0.27671771,-621.44635,474.51384)" />
-                    <path
-id="path37822"
-                        :style="{ fill: logoColor('lapisLazuli', 'mid'), fillOpacity: 1, stroke: 'none', strokeWidth: 0.264594, strokeDasharray: 'none', strokeDashoffset: 0, strokeOpacity: 1, paintOrder: 'normal' }"
-                        d="m -2372.2505,430.07114 32.7645,-7.653 14.7595,30.53932 26.4116,20.84472 -14.6742,30.58038 0.1703,33.64594 -33.0579,7.59379 -26.1992,21.11108 -26.5484,-21.11108 -32.8403,-7.32086 -0.047,-33.91887 -14.7519,-30.24003 26.4894,-21.18507 14.4449,-30.38785 z"
-                        transform="matrix(-0.33988022,-5.155935e-4,1.4284337e-4,-0.3401893,-836.83165,188.02663)" />
-                </g>
+      id="svg44547"
+      class="tpl-logo-svg"
+      viewBox="0 0 344 344"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <!-- Satellite gems -->
+      <g
+        v-for="gem in satelliteGems"
+        :id="gem.id"
+        :key="gem.id"
+        :class="`gem gem-${gem.variant}`"
+        role="button"
+        tabindex="0"
+        @click="trigger(); selectVariant(gem.variant)"
+        @keydown="onGemKeydown($event, gem.variant)"
+      >
+        <polygon
+          :points="gem.outer"
+          :style="{
+            fill: logoColor(gem.variant, 'bg'),
+            fillOpacity: currentGem.variant === gem.variant ? 0.05 : 1,
+            stroke: logoColor(gem.variant, 'fg'),
+            strokeWidth: gem.outerStrokeWidth,
+            paintOrder: 'normal',
+          }"
+        />
+        <polygon
+          :points="gem.highlight"
+          :style="{ fill: logoColor(gem.variant, 'fg'), fillOpacity: currentGem.variant === gem.variant ? 0.50 : 1, stroke: 'none' }"
+        />
+        <polygon
+          :points="gem.facet"
+          :style="{ fill: logoColor(gem.variant, 'mid'), fillOpacity: currentGem.variant === gem.variant ? 0.05 : 1, stroke: 'none' }"
+        />
+      </g>
 
-                <!-- Amethyst -->
-                <g
-id="amethyst-gem" class="gem gem-amethyst" role="button" tabindex="0"
-                    @click="trigger(); selectVariant('amethyst')" @keydown="onGemKeydown($event, 'amethyst')">
-                    <path
-id="path37824"
-                        :style="{ fill: logoColor('amethyst', 'bg'), fillOpacity: 1, stroke: logoColor('amethyst', 'fg'), strokeWidth: 2.78701, strokeDasharray: 'none', strokeDashoffset: 0, strokeOpacity: 1, paintOrder: 'normal' }"
-                        d="m -2372.2505,406.59142 65.8811,31.72668 16.2713,71.28919 -45.5911,57.16949 -73.1226,0 -45.5911,-57.16949 16.2713,-71.28919 z"
-                        transform="matrix(-0.36622852,-0.17609647,0.17609647,-0.36622852,-1075.0178,-215.73679)" />
-                    <path
-id="path37826"
-                        :style="{ fill: logoColor('amethyst', 'fg'), fillOpacity: 1, stroke: 'none', strokeWidth: 0.264583, strokeDasharray: 'none', strokeDashoffset: 0, strokeOpacity: 1, paintOrder: 'normal' }"
-                        d="m -2372.2505,406.59142 65.8811,31.72668 16.2713,71.28919 -45.5911,57.16949 -73.1226,0 -45.5911,-57.16949 16.2713,-71.28919 z"
-                        transform="matrix(-0.27685726,-0.1331234,0.1331234,-0.27685726,-841.91314,-157.66244)" />
-                    <path
-id="path37828"
-                        :style="{ fill: logoColor('amethyst', 'mid'), fillOpacity: 1, stroke: 'none', strokeWidth: 0.264594, strokeDasharray: 'none', strokeDashoffset: 0, strokeOpacity: 1, paintOrder: 'normal' }"
-                        d="m -2372.2505,430.07114 32.7645,-7.653 14.7595,30.53932 26.4116,20.84472 -14.6742,30.58038 0.1703,33.64594 -33.0579,7.59379 -26.1992,21.11108 -26.5484,-21.11108 -32.8403,-7.32086 -0.047,-33.91887 -14.7519,-30.24003 26.4894,-21.18507 14.4449,-30.38785 z"
-                        transform="matrix(-0.21154855,-0.26601888,0.26602804,-0.21203268,-752.27091,-504.69267)" />
-                </g>
-
-                <!-- gold -->
-                <g
-id="gold-gem" class="gem gem-gold" role="button" tabindex="0" @click="trigger(); selectVariant('gold')"
-                    @keydown="onGemKeydown($event, 'gold')">
-                    <path
-id="path37830" :style="{
-                        fill: logoColor('gold', 'bg'),
-                        fillOpacity: 1,
-                        stroke: logoColor('gold', 'fg'),
-                        strokeWidth: 2.78701,
-                        strokeDasharray: 'none',
-                        strokeDashoffset: 0,
-                        strokeOpacity: 1,
-                        paintOrder: 'normal'
-                    }" d="m -2372.2505,406.59142 65.8811,31.72668 16.2713,71.28919 -45.5911,57.16949 -73.1226,0 -45.5911,-57.16949 16.2713,-71.28919 z"
-                        transform="matrix(0.40636596,0,0,0.40636596,888.81157,-372.91671)" />
-                    <path
-id="path37832" :style="{
-                        fill: logoColor('gold', 'fg'),
-                        fillOpacity: 1,
-                        stroke: 'none',
-                        strokeWidth: 0.264583,
-                        strokeDasharray: 'none',
-                        strokeDashoffset: 0,
-                        strokeOpacity: 1,
-                        paintOrder: 'normal'
-                    }" d="m -2372.2505,406.59142 65.8811,31.72668 16.2713,71.28919 -45.5911,57.16949 -73.1226,0 -45.5911,-57.16949 16.2713,-71.28919 z"
-                        transform="matrix(0.30719991,0,0,0.30719991,653.5648,-324.24038)" />
-                    <path
-id="path37834" :style="{
-                        fill: logoColor('gold', 'mid'),
-                        fillOpacity: 1, stroke: 'none', strokeWidth: 0.264594, strokeDasharray: 'none', strokeDashoffset: 0, strokeOpacity: 1, paintOrder: 'normal'
-                    }"
-                        d="m -2372.2505,430.07114 32.7645,-7.653 14.7595,30.53932 26.4116,20.84472 -14.6742,30.58038 0.1703,33.64594 -33.0579,7.59379 -26.1992,21.11108 -26.5484,-21.11108 -32.8403,-7.32086 -0.047,-33.91887 -14.7519,-30.24003 26.4894,-21.18507 14.4449,-30.38785 z"
-                        transform="matrix(0.30593137,0.14807035,-0.14786881,0.30637165,723.16029,27.359121)" />
-                </g>
-
-                <!-- Turquoise -->
-                <g
-id="turquoise-gem" class="gem gem-turquoise" role="button" tabindex="0"
-                    @click="trigger(); selectVariant('turquoise')" @keydown="onGemKeydown($event, 'turquoise')">
-                    <path
-id="path37836"
-                        :style="{ fill: logoColor('turquoise', 'bg'), fillOpacity: 1, stroke: logoColor('turquoise', 'fg'), strokeWidth: 2.78701, strokeDasharray: 'none', strokeDashoffset: 0, strokeOpacity: 1, paintOrder: 'normal' }"
-                        d="m -2372.2505,406.59142 65.8811,31.72668 16.2713,71.28919 -45.5911,57.16949 -73.1226,0 -45.5911,-57.16949 16.2713,-71.28919 z"
-                        transform="matrix(0.25341256,0.31767179,-0.31767179,0.25341256,762.36269,494.50036)" />
-                    <path
-id="path37838"
-                        :style="{ fill: logoColor('turquoise', 'fg'), fillOpacity: 1, stroke: 'none', strokeWidth: 0.264583, strokeDasharray: 'none', strokeDashoffset: 0, strokeOpacity: 1, paintOrder: 'normal' }"
-                        d="m -2372.2505,406.59142 65.8811,31.72668 16.2713,71.28919 -45.5911,57.16949 -73.1226,0 -45.5911,-57.16949 16.2713,-71.28919 z"
-                        transform="matrix(0.19157193,0.2401499,-0.2401499,0.19157193,577.60907,340.95388)" />
-                    <path
-id="path37840"
-                        :style="{ fill: logoColor('turquoise', 'mid'), fillOpacity: 1, stroke: 'none', strokeWidth: 0.264594, strokeDasharray: 'none', strokeDashoffset: 0, strokeOpacity: 1, paintOrder: 'normal' }"
-                        d="m -2372.2505,430.07114 32.7645,-7.653 14.7595,30.53932 26.4116,20.84472 -14.6742,30.58038 0.1703,33.64594 -33.0579,7.59379 -26.1992,21.11108 -26.5484,-21.11108 -32.8403,-7.32086 -0.047,-33.91887 -14.7519,-30.24003 26.4894,-21.18507 14.4449,-30.38785 z"
-                        transform="matrix(0.07502862,0.33149591,-0.33171442,0.07546073,346.15059,614.61914)" />
-                </g>
-
-                <!-- quartz -->
-                <g
-id="quartz-gem" class="gem gem-quartz" role="button" tabindex="0" @click="trigger(); selectVariant('quartz')"
-                    @keydown="onGemKeydown($event, 'quartz')">
-                    <path
-id="path37842"
-                        :style="{ fill: logoColor('quartz', 'bg'), fillOpacity: 1, stroke: logoColor('quartz', 'fg'), strokeWidth: 2.78701, strokeDasharray: 'none', strokeDashoffset: 0, strokeOpacity: 1, paintOrder: 'normal' }"
-                        d="m -2372.2505,406.59142 65.8811,31.72668 16.2713,71.28919 -45.5911,57.16949 -73.1226,0 -45.5911,-57.16949 16.2713,-71.28919 z"
-                        transform="matrix(-0.09030639,0.39620456,-0.39620456,-0.09030639,5.4152038,936.57751)" />
-                    <path
-id="path37844"
-                        :style="{ fill: logoColor('quartz', 'fg'), fillOpacity: 1, stroke: 'none', strokeWidth: 0.264583, strokeDasharray: 'none', strokeDashoffset: 0, strokeOpacity: 1, paintOrder: 'normal' }"
-                        d="m -2372.2505,406.59142 65.8811,31.72668 16.2713,71.28919 -45.5911,57.16949 -73.1226,0 -45.5911,-57.16949 16.2713,-71.28919 z"
-                        transform="matrix(-0.0682688,0.2995182,-0.2995182,-0.0682688,10.234791,696.39593)" />
-                    <path
-id="path37846"
-                        :style="{ fill: logoColor('quartz', 'mid'), fillOpacity: 1, stroke: 'none', strokeWidth: 0.264594, strokeDasharray: 'none', strokeDashoffset: 0, strokeOpacity: 1, paintOrder: 'normal' }"
-                        d="m -2372.2505,430.07114 32.7645,-7.653 14.7595,30.53932 26.4116,20.84472 -14.6742,30.58038 0.1703,33.64594 -33.0579,7.59379 -26.1992,21.11108 -26.5484,-21.11108 -32.8403,-7.32086 -0.047,-33.91887 -14.7519,-30.24003 26.4894,-21.18507 14.4449,-30.38785 z"
-                        transform="matrix(-0.21235467,0.26537583,-0.2658499,-0.21225601,-348.03892,686.11548)" />
-                </g>
-
-                <!-- jade -->
-                <g
-id="jade-gem" class="gem gem-jade" role="button" tabindex="0" @click="trigger(); selectVariant('jade')"
-                    @keydown="onGemKeydown($event, 'jade')">
-                    <path
-id="path37848" :style="{
-                        fill: logoColor('jade', 'bg'),
-                        fillOpacity: 1,
-                        stroke: logoColor('jade', 'fg'),
-                        strokeWidth: 2.78701,
-                        strokeDasharray: 'none',
-                        strokeDashoffset: 0,
-                        strokeOpacity: 1,
-                        paintOrder: 'normal'
-                    }" d="m -2372.2505,406.59142 65.8811,31.72668 16.2713,71.28919 -45.5911,57.16949 -73.1226,0 -45.5911,-57.16949 16.2713,-71.28919 z"
-                        transform="matrix(-0.09072125,-0.39610977,0.39610977,-0.09072125,-585.16814,-942.68176)" />
-                    <path
-id="path37850"
-                        :style="{ fill: logoColor('jade', 'fg'), fillOpacity: 1, stroke: 'none', strokeWidth: 0.264583, strokeDasharray: 'none', strokeDashoffset: 0, strokeOpacity: 1, paintOrder: 'normal' }"
-                        d="m -2372.2505,406.59142 65.8811,31.72668 16.2713,71.28919 -45.5911,57.16949 -73.1226,0 -45.5911,-57.16949 16.2713,-71.28919 z"
-                        transform="matrix(-0.06858242,-0.29944655,0.29944655,-0.06858242,-485.20152,-724.23943)" />
-                    <path
-id="path37852"
-                        :style="{ fill: logoColor('jade', 'mid'), fillOpacity: 1, stroke: 'none', strokeWidth: 0.264594, strokeDasharray: 'none', strokeDashoffset: 0, strokeOpacity: 1, paintOrder: 'normal' }"
-                        d="m -2372.2505,430.07114 32.7645,-7.653 14.7595,30.53932 26.4116,20.84472 -14.6742,30.58038 0.1703,33.64594 -33.0579,7.59379 -26.1992,21.11108 -26.5484,-21.11108 -32.8403,-7.32086 -0.047,-33.91887 -14.7519,-30.24003 26.4894,-21.18507 14.4449,-30.38785 z"
-                        transform="matrix(0.07603401,-0.33126675,0.33165093,0.07573928,-158.0131,-870.57299)" />
-                </g>
-
-                <!-- fire opal -->
-                <g
-id="fireopal-gem" class="gem gem-fireopal" role="button" tabindex="0"
-                    @click="trigger(); selectVariant('fireOpal')" @keydown="onGemKeydown($event, 'fireOpal')">
-                    <path
-id="path37854"
-                        :style="{ fill: logoColor('fireOpal', 'bg'), fillOpacity: 1, stroke: logoColor('fireOpal', 'fg'), strokeWidth: 2.78701, strokeDasharray: 'none', strokeDashoffset: 0, strokeOpacity: 1, paintOrder: 'normal' }"
-                        d="m -2372.2505,406.59142 65.8811,31.72668 16.2713,71.28919 -45.5911,57.16949 -73.1226,0 -45.5911,-57.16949 16.2713,-71.28919 z"
-                        transform="matrix(0.25307975,-0.31793699,0.31793699,0.25307975,288.5861,-1013.0752)" />
-                    <path
-id="path37856"
-                        :style="{ fill: logoColor('fireOpal', 'fg'), fillOpacity: 1, stroke: 'none', strokeWidth: 0.264583, strokeDasharray: 'none', strokeDashoffset: 0, strokeOpacity: 1, paintOrder: 'normal' }"
-                        d="m -2372.2505,406.59142 65.8811,31.72668 16.2713,71.28919 -45.5911,57.16949 -73.1226,0 -45.5911,-57.16949 16.2713,-71.28919 z"
-                        transform="matrix(0.19132035,-0.24035038,0.24035038,0.19132035,180.16124,-798.70533)" />
-                    <path
-id="path37858"
-                        :style="{ fill: logoColor('fireOpal', 'mid'), fillOpacity: 1, stroke: 'none', strokeWidth: 0.264594, strokeDasharray: 'none', strokeDashoffset: 0, strokeOpacity: 1, paintOrder: 'normal' }"
-                        d="m -2372.2505,430.07114 32.7645,-7.653 14.7595,30.53932 26.4116,20.84472 -14.6742,30.58038 0.1703,33.64594 -33.0579,7.59379 -26.1992,21.11108 -26.5484,-21.11108 -32.8403,-7.32086 -0.047,-33.91887 -14.7519,-30.24003 26.4894,-21.18507 14.4449,-30.38785 z"
-                        transform="matrix(0.3063792,-0.14714148,0.14761148,0.30649573,498.59265,-634.18437)" />
-                </g>
-
-
-                <g id="obsidian-gem">
-                    <path
-id="path37860" :style="{
-                        fill: logoColor(variant, 'wbg'),
-                        fillOpacity: 1,
-                        stroke: logoColor(variant, 'wb'),
-                        strokeWidth: 1,
-                        strokeDasharray: 'none',
-                        strokeOpacity: 1
-                    }"
-                        d="m -138.28767,-201.38037 13.48616,64.67353 -26.74893,32.74726 -65.40941,1.23099 61.58018,31.096306 8.64547,36.979119 -42.14766,54.941317 67.37859,-30.899859 28.362823,13.3350213 17.942894,72.3126257 17.953881,-72.35657 28.310005,-13.310255 67.420729,30.919037 -42.2112734,-55.024053 8.6149903,-36.848838 61.6742161,-31.143851 -65.4935767,-1.23249 -26.6818353,-32.66451 13.503226,-64.75478 -41.766556,50.39799 h -42.647674 z" />
-                    <!-- OBSIDIAN -->
-                    <g
-id="center-gem" class="gem gem-obsidian" role="button" tabindex="0"
-                        @click="trigger(); selectVariant('obsidian')" @keydown="onGemKeydown($event, 'obsidian')">
-                        <path
-id="path37862" :style="{
-                            fill: logoColor('obsidian', 'bg'),
-                            fillOpacity: 1,
-                            stroke: logoColor('obsidian', 'fg'),
-                            strokeWidth: 0.725715,
-                            strokeDasharray: 'none',
-                            strokeDashoffset: 0,
-                            strokeOpacity: 1,
-                            paintOrder: 'normal'
-                        }" d="m -2372.2505,406.59142 65.8811,31.72668 16.2713,71.28919 -45.5911,57.16949 -73.1226,0 -45.5911,-57.16949 16.2713,-71.28919 z"
-                            transform="matrix(0.67128102,0,0,-0.65537035,1517.7119,250.40573)" />
-                        <path
-id="path37864" :style="{
-                            fill: logoColor('obsidian', 'fg'),
-                            fillOpacity: 1,
-                            stroke: 'none',
-                            strokeWidth: 1.91996,
-                            strokeDasharray: 'none',
-                            strokeDashoffset: 0,
-                            strokeOpacity: 1,
-                            paintOrder: 'normal'
-                        }" d="m -2372.2505,406.59142 65.8811,31.72668 16.2713,71.28919 -45.5911,57.16949 -73.1226,0 -45.5911,-57.16949 16.2713,-71.28919 z"
-                            transform="matrix(0.50746735,0,0,-0.49543943,1129.105,171.90259)" />
-                        <path
-id="path37866" :style="{
-                            fill: logoColor('obsidian', 'mid'),
-                            fillOpacity: 1,
-                            stroke: 'none',
-                            strokeWidth: 1.73456,
-                            strokeDasharray: 'none',
-                            strokeDashoffset: 0,
-                            strokeOpacity: 1,
-                            paintOrder: 'normal'
-                        }" d="m -2372.2505,429.15437 32.9406,-6.69961 15.3001,29.93111 25.7761,21.57682 -13.8616,30.62387 -0.7984,33.60547 -32.5852,8.25624 -26.7716,20.32851 -26.7716,-20.32852 -32.5852,-8.25622 -0.7984,-33.60548 -13.8616,-30.62386 25.7761,-21.57683 15.3002,-29.93111 z"
-                            transform="matrix(0.50537183,-0.2388018,-0.24426634,-0.49410366,1244.1907,-395.21253)" />
-                    </g>
-                </g>
-            </g>
+      <!-- Obsidian (center) -->
+      <g id="obsidian-gem">
+        <path
+          id="STAR_PATH"
+          :d="STAR_PATH"
+          transform="translate(247.177, 243.651)"
+          fill-rule="evenodd"
+          :style="{
+            fill: logoColor(variant, 'wbg'),
+            stroke: logoColor(variant, 'wb'),
+            fillOpacity: 1,
+            strokeWidth: 1,
+          }"
+        />
+        <g
+          id="center-gem"
+          class="gem gem-obsidian"
+          role="button"
+          tabindex="0"
+          @click="trigger(); selectVariant('obsidian')"
+          @keydown="onGemKeydown($event, 'obsidian')"
+        >
+          <polygon
+            :points="obsidian.outer"
+            :style="{
+              fill: logoColor('obsidian', 'bg'),
+              fillOpacity: 0,
+              stroke: logoColor('obsidian', 'fg'),
+              strokeWidth: obsidian.outerStrokeWidth,
+              paintOrder: 'normal',
+            }"
+          />
+          <polygon
+            :points="obsidian.highlight"
+            :style="{ fill: logoColor('obsidian', 'fg'), fillOpacity: 1, stroke: 'none' }"
+          />
+          <polygon
+            :points="obsidian.facet"
+            :style="{ fill: logoColor('obsidian', 'mid'), fillOpacity: 1, stroke: 'none' }"
+          />
         </g>
+      </g>
     </svg>
-
+  </div>
 </template>
 
 <style scoped>
+.logo-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.gem-backdrops {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.gem-frost {
+  position: absolute;
+  inset: 0;
+}
+
+.light-frost {
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+}
+
+.dark-frost {
+  backdrop-filter: blur(3px) brightness(3) saturate(150%);
+  -webkit-backdrop-filter: blur(3px) brightness(3) saturate(150%);
+}
+
 .tpl-logo-svg {
-    pointer-events: none;
+  position: relative;
+  z-index: 2;
+  pointer-events: none;
+  display: block;
 }
 
 .gem {
-    outline: none;
-    transform-box: fill-box;
-    transform-origin: center;
-    transition: transform 180ms ease-out;
-    cursor: pointer;
-    pointer-events: auto;
+  outline: none;
+  transform-box: fill-box;
+  transform-origin: center center;
+  transition: transform 180ms ease-out;
+  cursor: pointer;
+  pointer-events: auto;
 }
 
-.gem path {
-    transition: fill 260ms ease, stroke 260ms ease, fill-opacity 260ms ease, stroke-opacity 260ms ease;
+.gem polygon {
+  transition: fill 260ms ease, stroke 260ms ease, fill-opacity 260ms ease;
 }
 
 .gem:hover,
 .gem:focus-visible {
-    transform: scale(1.1);
+  transform: scale(1.10);
 }
 
 .gem:active {
-    transform: scale(0.95);
+  transform: scale(0.98);
 }
+
 </style>

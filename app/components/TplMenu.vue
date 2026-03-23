@@ -2,11 +2,13 @@
 import type { LogoVariant } from '@/models/variants'
 import { onMounted, ref, watch } from 'vue'
 import { useWebHaptics } from 'web-haptics/vue'
+import { useSound } from '@vueuse/sound'
 
 const { $anime } = useNuxtApp()
 const { variant, setVariant } = useThemeVariant({ defaultVariant: 'obsidian' })
 
 const { trigger } = useWebHaptics();
+const { play } = useSound('/sounds/winding.mp3', { volume: 0.20 })
 
 
 const logoWidthVw = ref(100)
@@ -76,6 +78,7 @@ function runNextRotationStep() {
   }
 
   isRotating.value = true
+  play()
 
   const direction = pendingRotationSteps.value > 0 ? 1 : -1
   pendingRotationSteps.value -= direction

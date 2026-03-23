@@ -6,7 +6,7 @@ import TplVariantModeImageSwap from '@/components/shared/TplVariantModeImageSwap
 <template>
 
       <section max-w-md>
-        <h2>Errors won't be too distracting</h2>
+        <h2>Errors shouldn't stress you out</h2>
         <p>
           Errors will still be visible, but the <em>squigly underlines</em> follow the same hue as the text for this theme*.
         </p>

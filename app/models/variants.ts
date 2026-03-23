@@ -15,7 +15,9 @@ type ThemeMode = {
         widgetBg: string
         widgetHoverBg: string
         widgetHoverForeground: string
+        shadow: string
     }
+    // 
     logo: {
         bg: string
         fg: string
@@ -40,7 +42,8 @@ export const themePalette = {
                 widgetBorder: '#222222',
                 widgetBg: '#0d0d0d',
                 widgetHoverBg: '#1b1b1b',
-                widgetHoverForeground: '#a7a7a7'
+                widgetHoverForeground: '#a7a7a7',
+                 shadow: '#020202'
             },
             logo: {
                 bg: '#0d0d0d',
@@ -58,7 +61,9 @@ export const themePalette = {
                 widgetBorder: '#dedede',
                 widgetBg: '#f2f2f2',
                 widgetHoverBg: '#dfdfdf',
-                widgetHoverForeground: '#4f4f4f'
+                widgetHoverForeground: '#4f4f4f',
+                shadow: '#d5d5d56f'
+
             },
             logo: {
                 bg: '#fdfdfd',
@@ -78,7 +83,9 @@ export const themePalette = {
                 widgetBorder: '#38261e',
                 widgetBg: '#15100b',
                 widgetHoverBg: '#4d3a1a',
-                widgetHoverForeground: '#bda88a'
+                widgetHoverForeground: '#bda88a',
+                shadow: '#090705'
+
             },
             logo: {
                 bg: '#0a0509',
@@ -96,7 +103,8 @@ export const themePalette = {
                 widgetBorder: '#e1cfc7',
                 widgetBg: '#f4efea',
                 widgetHoverBg: '#e1d2bd',
-                widgetHoverForeground: '#756042'
+                widgetHoverForeground: '#756042',
+                shadow: '#ece2d2'
             },
             logo: {
                 bg: '#faf8f6',
@@ -116,7 +124,9 @@ export const themePalette = {
                 widgetBorder: '#1e3837',
                 widgetBg: '#091010',
                 widgetHoverBg: '#1a4d4b',
-                widgetHoverForeground: '#6aadaa'
+                widgetHoverForeground: '#6aadaa',
+                shadow: '#050909'
+
             },
             logo: {
                 bg: '#070a0d',
@@ -134,7 +144,8 @@ export const themePalette = {
                 widgetBorder: '#c7e1e0',
                 widgetBg: '#eff6f6',
                 widgetHoverBg: '#b2e5e3',
-                widgetHoverForeground: '#33615f'
+                widgetHoverForeground: '#33615f',
+                shadow: '#d2ecebcc'
             },
             logo: {
                 bg: '#f6fafa',
@@ -154,7 +165,8 @@ export const themePalette = {
                 widgetBorder: '#381e2e',
                 widgetBg: '#140912',
                 widgetHoverBg: '#4d1a3a',
-                widgetHoverForeground: '#f78abe'
+                widgetHoverForeground: '#f78abe',
+                shadow: '#0a0509'
             },
             logo: {
                 bg: '#0a0509',
@@ -172,7 +184,8 @@ export const themePalette = {
                 widgetBorder: '#e1c7d7',
                 widgetBg: '#f6ebf4',
                 widgetHoverBg: '#e5b2d2',
-                widgetHoverForeground: '#75083c'
+                widgetHoverForeground: '#75083c',
+                shadow: '#ecd2e7'
             },
             logo: {
                 bg: '#faf5f9',
@@ -192,7 +205,8 @@ export const themePalette = {
                 widgetBorder: '#1e2a38',
                 widgetBg: '#0c141a',
                 widgetHoverBg: '#1a3a4d',
-                widgetHoverForeground: '#99b8d4'
+                widgetHoverForeground: '#99b8d4',
+                shadow: '#070a0d'
             },
             logo: {
                 bg: '#050909',
@@ -210,7 +224,8 @@ export const themePalette = {
                 widgetBorder: '#c7d3e1',
                 widgetBg: '#e5edf3',
                 widgetHoverBg: '#b2d2e3',
-                widgetHoverForeground: '#2b4a66'
+                widgetHoverForeground: '#2b4a66',
+                shadow: '#d8e3ef'
             },
             logo: {
                 bg: '#f2f5f8',
@@ -230,7 +245,8 @@ export const themePalette = {
                 widgetBorder: '#261e38',
                 widgetBg: '#10101c',
                 widgetHoverBg: '#2a1a4d',
-                widgetHoverForeground: '#997cc0'
+                widgetHoverForeground: '#997cc0',
+                shadow: '#060407'
             },
             logo: {
                 bg: '#060407',
@@ -248,7 +264,8 @@ export const themePalette = {
                 widgetBorder: '#cfc7e1',
                 widgetBg: '#f4f1f9',
                 widgetHoverBg: '#cbb2e3',
-                widgetHoverForeground: '#5c3f83'
+                widgetHoverForeground: '#5c3f83',
+                shadow: '#ecdaf5'
             },
             logo: {
                 bg: '#faf8fb',
@@ -268,7 +285,8 @@ export const themePalette = {
                 widgetBorder: '#1e3829',
                 widgetBg: '#0b1410',
                 widgetHoverBg: '#1a4d2e',
-                widgetHoverForeground: '#6aad8f'
+                widgetHoverForeground: '#6aad8f',
+                shadow: '#070b09'
             },
             logo: {
                 bg: '#070b09',
@@ -286,7 +304,8 @@ export const themePalette = {
                 widgetBorder: '#c7e1d2',
                 widgetBg: '#ebf4f0',
                 widgetHoverBg: '#b2e5c3',
-                widgetHoverForeground: '#3c7159'
+                widgetHoverForeground: '#3c7159',
+                shadow: '#d1e1d9'
             },
             logo: {
                 bg: '#f4f8f6',
@@ -306,7 +325,8 @@ export const themePalette = {
                 widgetBorder: '#381e1e',
                 widgetBg: '#150c0c',
                 widgetHoverBg: '#4d1a1a',
-                widgetHoverForeground: '#d96670'
+                widgetHoverForeground: '#d96670',
+                shadow: '#0c0707'
             },
             logo: {
                 bg: '#0c0707',
@@ -324,7 +344,8 @@ export const themePalette = {
                 widgetBorder: '#e1c7c7',
                 widgetBg: '#f3eaea',
                 widgetHoverBg: '#e5b2b2',
-                widgetHoverForeground: '#992630'
+                widgetHoverForeground: '#992630',
+                shadow: '#f4d7d7'
             },
             logo: {
                 bg: '#f8f3f3',

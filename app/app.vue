@@ -9,6 +9,8 @@ import TplVersionControl from './components/featureSections/TplVersionControl.vu
 import TplAiChat from './components/featureSections/TplAiChat.vue'
 import TplExtensions from './components/featureSections/TplExtensions.vue'
 import TplEditorWidgets from './components/featureSections/TplEditorWidgets.vue'
+import { themePalette } from './models/variants'
+import TplStatusBar from './components/featureSections/TplStatusBar.vue'
 const { variant } = useThemeVariant({ defaultVariant: 'obsidian' })
 const { resolvedMode, value: colorModeValue, preference: colorModePreference, hasStoredPreference } = useResolvedColorMode()
 
@@ -62,6 +64,19 @@ const selectionClass = computed(() => {
   return `selection:bg-${variant.value}-${mode}-logo-fg selection:text-${variant.value}-${mode}-logo-bg`
 })
 
+const shadowColor = computed(() => {
+  const mode = resolvedMode.value.toLowerCase() as 'dark' | 'light'
+  return themePalette[variant.value][mode].ui.shadow
+})
+
+const boxShadow = computed(() => {
+  const mode = resolvedMode.value.toLowerCase()
+  console.log(mode, shadowColor.value)
+  return mode === 'dark' ?
+  `0 12px 12px color-mix(in srgb, ${shadowColor.value} 90%, transparent)`
+  : `0 6px 12px color-mix(in srgb, ${shadowColor.value} 45%, transparent)`;
+})
+
 </script>
 <template>
   <ColorScheme>
@@ -82,7 +97,9 @@ const selectionClass = computed(() => {
       border="b-solid b-1"
       :class="borderClass"
       sticky top-0 z-10
-      backdrop-blur-md    >
+      backdrop-blur-md
+      class="scroll-shadow-nav"
+    >
     
       <h1 font-serif>Tlapalli <small font-sans opacity-80 text-sm>VSCode Theme</small></h1>
 
@@ -214,7 +231,23 @@ const selectionClass = computed(() => {
 
     
 
+   <section
+      p-4
+      lg:border-none
+      rounded-lg
+        border-solid
+        flex flex-col
+        :class="borderClass"
+        w="full">
+       <TplStatusBar />
+    </section>
+     
     </main>
+    
+    <footer>
+      
+      and then some
+    </footer>
 
     <aside
       v-if="showDebugBadge"
@@ -236,6 +269,21 @@ const selectionClass = computed(() => {
 </template>
 
 <style scoped>
+
+.scroll-shadow-nav {
+  animation: scroll-shadow linear forwards;
+  animation-timeline: scroll(root block);
+  animation-range: 0% 1vh;
+}
+
+@keyframes scroll-shadow {
+  from {
+    box-shadow: none;
+  }
+  to {
+    box-shadow: v-bind(boxShadow)
+  }
+}
 
 .activity-bar-preview-shell {
   -webkit-mask-image: linear-gradient(to top, transparent 10%, black 100%);

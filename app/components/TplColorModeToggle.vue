@@ -2,6 +2,7 @@
 import { computed, nextTick, onBeforeUnmount, onBeforeUpdate, ref, type ComponentPublicInstance } from 'vue'
 import { useResolvedColorMode } from '@/composables/useResolvedColorMode'
 import { useThemeVariant } from '@/composables/useThemeVariant'
+import { useWebHaptics } from 'web-haptics/vue'
 
 const { $anime } = useNuxtApp()
 const { resolvedMode, preference } = useResolvedColorMode()
@@ -13,7 +14,9 @@ const menuPanel = ref<HTMLElement | null>(null)
 const menuItems = ref<HTMLElement[]>([])
 const prefersDark = usePreferredDark()
 const osModeLabel = computed<'Light' | 'Dark'>(() => (prefersDark.value ? 'Dark' : 'Light'))
+const { trigger } = useWebHaptics()
 let menuAnimation: { pause: () => void } | null = null
+
 
 // Panel position state for teleported element
 const panelStyle = ref({
@@ -60,6 +63,12 @@ const iconClass = computed(() => {
   if (preference.value === 'light') return 'i-mynaui:sun hover:i-mynaui:sun-solid'
   if (preference.value === 'dark') return 'i-mynaui:moon hover:i-mynaui:moon-solid'
   return 'i-ph:monitor :hover:i-ph:monitor-fill'
+})
+
+const iconClassMenuOpen = computed(() => {
+  if (preference.value === 'light') return 'i-mynaui:sun-solid'
+  if (preference.value === 'dark') return 'i-mynaui:moon-solid'
+  return 'i-ph:monitor-fill'
 })
 
 const buttonLabel = computed(() => {
@@ -223,7 +232,7 @@ onClickOutside(menuRoot, (event) => {
 </script>
 
 <template>
-  <div ref="menuRoot" class="color-mode-menu-root" text-inherit>
+  <div ref="menuRoot" class="color-mode-menu-root">
     <button
       ref="triggerButton"
       bg-transparent
@@ -233,14 +242,16 @@ onClickOutside(menuRoot, (event) => {
       relative
       z-20
       touch-manipulation
+      hover:scale-110 active:scale-95
+      transition-transform
       :class="textClass"
       :aria-label="buttonLabel"
       :title="buttonLabel"
       :aria-expanded="isMenuOpen"
       aria-haspopup="menu"
-      @click="toggleMenu"
+      @click="toggleMenu(); trigger();"
     >
-      <div text-xl :class="[ iconClass, textClass ]"  />
+      <div text-xl :class="[ iconClass, textClass, isMenuOpen ? iconClassMenuOpen : '' ]"  />
     </button>
 
     <Teleport to="body">
@@ -264,7 +275,7 @@ onClickOutside(menuRoot, (event) => {
           :class="{ 'color-mode-menu-item-active': preference === option.value, [surfaceClass]: true,[textClass]: true, [hoverButtonClass]: true }"
           role="menuitemradio"
           :aria-checked="preference === option.value"
-          @click="setMode(option.value)"
+          @click="setMode(option.value); trigger();"
         >
           <span class="color-mode-menu-icon" :class="option.iconClass" />
           <span class="color-mode-menu-copy">
