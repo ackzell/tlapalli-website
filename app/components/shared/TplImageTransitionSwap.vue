@@ -1,44 +1,46 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { EDITOR_PREVIEW_REVEAL_DURATION } from '@/composables/useEditorPreviewTiming'
-import { useImageTransitionSwap } from '@/composables/useImageTransitionSwap'
+  import { computed } from 'vue';
 
-const props = withDefaults(defineProps<{
-  src: string
-  alt: string
-  sizes?: string
-  densities?: string
-  baseDuration?: number
-  easing?: string
-  syncToken?: number
-  syncStartedAt?: number
-  syncDuration?: number
-}>(), {
-  sizes: '100vw',
-  densities: 'x1 x2',
-  baseDuration: EDITOR_PREVIEW_REVEAL_DURATION,
-  easing: 'easeInOutCubic',
-  syncToken: 0,
-  syncStartedAt: 0,
-  syncDuration: EDITOR_PREVIEW_REVEAL_DURATION,
-})
+  import { EDITOR_PREVIEW_REVEAL_DURATION } from '@/composables/useEditorPreviewTiming';
+  import { useImageTransitionSwap } from '@/composables/useImageTransitionSwap';
 
-const source = computed(() => props.src)
-const syncToken = computed(() => props.syncToken)
-const syncStartedAt = computed(() => props.syncStartedAt)
+  const props = withDefaults(
+    defineProps<{
+      src: string;
+      alt: string;
+      sizes?: string;
+      densities?: string;
+      baseDuration?: number;
+      easing?: string;
+      syncToken?: number;
+      syncStartedAt?: number;
+      syncDuration?: number;
+    }>(),
+    {
+      sizes: '100vw',
+      densities: 'x1 x2',
+      baseDuration: EDITOR_PREVIEW_REVEAL_DURATION,
+      easing: 'easeInOutCubic',
+      syncToken: 0,
+      syncStartedAt: 0,
+      syncDuration: EDITOR_PREVIEW_REVEAL_DURATION,
+    },
+  );
 
-const {
-  frameRef,
-  layerSrcs,
-  setLayerRef,
-} = useImageTransitionSwap({
-  source,
-  baseDuration: computed(() => props.baseDuration),
-  easing: props.easing,
-  syncToken,
-  syncStartedAt,
-  syncDuration: computed(() => props.syncDuration),
-})
+
+  const source = computed(() => props.src);
+  const syncToken = computed(() => props.syncToken);
+  const syncStartedAt = computed(() => props.syncStartedAt);
+
+
+  const { frameRef, layerSrcs, setLayerRef } = useImageTransitionSwap({
+    source,
+    baseDuration: computed(() => props.baseDuration),
+    easing: props.easing,
+    syncToken,
+    syncStartedAt,
+    syncDuration: computed(() => props.syncDuration),
+  });
 </script>
 
 <template>
@@ -69,28 +71,28 @@ const {
 </template>
 
 <style scoped>
-.preview-frame {
-  position: relative;
-  width: 100%;
-  max-width: 100%;
-  overflow: hidden;
-}
+  .preview-frame {
+    position: relative;
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+  }
 
-.preview-layer {
-  position: relative;
-  width: 100%;
-  pointer-events: none;
-}
+  .preview-layer {
+    position: relative;
+    width: 100%;
+    pointer-events: none;
+  }
 
-.preview-layer--top {
-  position: absolute;
-  inset: 0;
-}
+  .preview-layer--top {
+    position: absolute;
+    inset: 0;
+  }
 
-.preview-image {
-  display: block;
-  width: 100%;
-  max-width: 100%;
-  height: auto;
-}
+  .preview-image {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+  }
 </style>

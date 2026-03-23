@@ -1,0 +1,17 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "ignorePatterns": [],
+  "singleQuote": true,
+  "vueIndentScriptAndStyle": true,
+  "sortImports": {
+    "newlinesBetween": true,
+    "groups": [
+      ["value-builtin", "value-external"],
+      { "newlinesBetween": true },
+      ["value-internal", "value-parent", "value-sibling", "value-index"],
+      { "newlinesBetween": true },
+      "type-import",
+      "unknown"
+    ]
+  }
+}

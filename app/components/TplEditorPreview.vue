@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import TplVariantModeImageSwap from '@/components/shared/TplVariantModeImageSwap.vue'
-
+  import TplVariantModeImageSwap from '@/components/shared/TplVariantModeImageSwap.vue';
 </script>
 
 <template>
@@ -21,10 +20,10 @@ import TplVariantModeImageSwap from '@/components/shared/TplVariantModeImageSwap
 </template>
 
 <style scoped>
-.preview-image {
-  display: block;
-  width: 100%;
-  max-width: 100%;
-  height: auto;
-}
+  .preview-image {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+  }
 </style>

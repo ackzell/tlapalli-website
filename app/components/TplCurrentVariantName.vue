@@ -1,107 +1,120 @@
 <script setup lang="ts">
-import { onBeforeUnmount, ref, watch } from 'vue'
-import { useVariantSwitchTimeline } from '@/composables/useVariantSwitchTimeline'
+  import { onBeforeUnmount, ref, watch } from 'vue';
 
-const { variant } = useThemeVariant({ defaultVariant: 'obsidian' })
-const { switchToken, toVariant, phaseDurations } = useVariantSwitchTimeline()
-const { $anime } = useNuxtApp()
+  import { useVariantSwitchTimeline } from '@/composables/useVariantSwitchTimeline';
 
-const displayedVariant = ref<string>(variant.value)
-const isTyping = ref(false)
-const cursorState = ref<'hidden' | 'typing' | 'settling'>('hidden')
-const cursorKey = ref(0)
+  const { variant } = useThemeVariant({ defaultVariant: 'obsidian' });
+  const { switchToken, toVariant, phaseDurations } = useVariantSwitchTimeline();
+  const { $anime } = useNuxtApp();
 
-let variantAnimation: { pause: () => void } | null = null
-let cursorHideTimer: number | undefined
 
-function clearCursorHideTimer() {
-  if (cursorHideTimer) {
-    window.clearTimeout(cursorHideTimer)
-    cursorHideTimer = undefined
-  }
-}
+  const displayedVariant = ref<string>(variant.value);
+  const isTyping = ref(false);
+  const cursorState = ref<'hidden' | 'typing' | 'settling'>('hidden');
+  const cursorKey = ref(0);
 
-function showTypingCursor() {
-  clearCursorHideTimer()
-  cursorState.value = 'typing'
-  cursorKey.value += 1
-}
 
-function settleCursor() {
-  clearCursorHideTimer()
-  cursorState.value = 'settling'
-  cursorKey.value += 1
-  cursorHideTimer = window.setTimeout(() => {
-    cursorState.value = 'hidden'
-    cursorHideTimer = undefined
-  }, 1680)
-}
+  let variantAnimation: { pause: () => void } | null = null;
+  let cursorHideTimer: number | undefined;
 
-function animateVariantText(nextValue: string) {
-  if (!import.meta.client) {
-    displayedVariant.value = nextValue
-    return
+
+  function clearCursorHideTimer() {
+    if (cursorHideTimer) {
+      window.clearTimeout(cursorHideTimer);
+      cursorHideTimer = undefined;
+    }
   }
 
-  isTyping.value = true
-  variantAnimation?.pause()
-  showTypingCursor()
 
-  const current = displayedVariant.value
-  const state = {
-    count: current.length
+  function showTypingCursor() {
+    clearCursorHideTimer();
+    cursorState.value = 'typing';
+    cursorKey.value += 1;
   }
 
-  const { removeDuration, pauseDuration, typeDuration } = phaseDurations.value
 
-  variantAnimation = $anime
-    .timeline({ autoplay: true })
-    .add({
-      targets: state,
-      count: 0,
-      duration: removeDuration,
-      easing: 'linear',
-      update: () => {
-        displayedVariant.value = current.slice(0, Math.floor(state.count))
-      }
-    })
-    .add({
-      duration: pauseDuration
-    })
-    .add({
-      targets: state,
-      count: nextValue.length,
-      duration: typeDuration,
-      easing: 'linear',
-      update: () => {
-        displayedVariant.value = nextValue.slice(0, Math.floor(state.count))
-      },
-      complete: () => {
-        displayedVariant.value = nextValue
-        isTyping.value = false
-        settleCursor()
-      }
-    })
-}
-
-watch(switchToken, () => {
-  const nextValue = toVariant.value
-
-  if (!import.meta.client) {
-    displayedVariant.value = nextValue
-    return
+  function settleCursor() {
+    clearCursorHideTimer();
+    cursorState.value = 'settling';
+    cursorKey.value += 1;
+    cursorHideTimer = window.setTimeout(() => {
+      cursorState.value = 'hidden';
+      cursorHideTimer = undefined;
+    }, 1680);
   }
 
-  animateVariantText(nextValue)
-})
 
-onBeforeUnmount(() => {
-  clearCursorHideTimer()
-  variantAnimation?.pause()
-  variantAnimation = null
-  isTyping.value = false
-  cursorState.value = 'hidden'
-})
+  function animateVariantText(nextValue: string) {
+    if (!import.meta.client) {
+      displayedVariant.value = nextValue;
+      return;
+    }
+
+
+    isTyping.value = true;
+    variantAnimation?.pause();
+    showTypingCursor();
+
+
+    const current = displayedVariant.value;
+    const state = {
+      count: current.length,
+    };
+
+
+    const { removeDuration, pauseDuration, typeDuration } = phaseDurations.value;
+
+
+    variantAnimation = $anime
+      .timeline({ autoplay: true })
+      .add({
+        targets: state,
+        count: 0,
+        duration: removeDuration,
+        easing: 'linear',
+        update: () => {
+          displayedVariant.value = current.slice(0, Math.floor(state.count));
+        },
+      })
+      .add({
+        duration: pauseDuration,
+      })
+      .add({
+        targets: state,
+        count: nextValue.length,
+        duration: typeDuration,
+        easing: 'linear',
+        update: () => {
+          displayedVariant.value = nextValue.slice(0, Math.floor(state.count));
+        },
+        complete: () => {
+          displayedVariant.value = nextValue;
+          isTyping.value = false;
+          settleCursor();
+        },
+      });
+  }
+
+
+  watch(switchToken, () => {
+    const nextValue = toVariant.value;
+
+    if (!import.meta.client) {
+      displayedVariant.value = nextValue;
+      return;
+    }
+
+    animateVariantText(nextValue);
+  });
+
+
+  onBeforeUnmount(() => {
+    clearCursorHideTimer();
+    variantAnimation?.pause();
+    variantAnimation = null;
+    isTyping.value = false;
+    cursorState.value = 'hidden';
+  });
 </script>
 
 <template>
@@ -115,53 +128,54 @@ onBeforeUnmount(() => {
         'type-cursor-settling': cursorState === 'settling',
         'type-cursor-hidden': cursorState === 'hidden',
       }"
-    >█</span>
+      >█</span
+    >
   </span>
 </template>
 
 <style scoped>
-.type-cursor {
-  display: inline-block;
-  margin-left: 1px;
-  line-height: 1;
-  vertical-align: baseline;
-  transform: translateY(-0.02em);
-  font-size: 1.2rem;
-  opacity: 0;
-}
-
-.type-cursor-typing {
-  animation: cursor-phase 520ms ease-in-out infinite;
-}
-
-.type-cursor-settling {
-  animation: cursor-phase 560ms ease-in-out 3;
-}
-
-.type-cursor-hidden {
-  animation: none;
-  opacity: 0;
-}
-
-.variant-value {
-  display: inline-flex;
-  align-items: baseline;
-  white-space: nowrap;
-  line-height: 1;
-}
-
-@keyframes cursor-phase {
-  0% {
-    opacity: 0.25;
-    transform: translateY(-0.02em) scaleY(0.94);
+  .type-cursor {
+    display: inline-block;
+    margin-left: 1px;
+    line-height: 1;
+    vertical-align: baseline;
+    transform: translateY(-0.02em);
+    font-size: 1.2rem;
+    opacity: 0;
   }
-  50% {
-    opacity: 1;
-    transform: translateY(-0.02em) scaleY(1);
+
+  .type-cursor-typing {
+    animation: cursor-phase 520ms ease-in-out infinite;
   }
-  100% {
-    opacity: 0.25;
-    transform: translateY(-0.02em) scaleY(0.94);
+
+  .type-cursor-settling {
+    animation: cursor-phase 560ms ease-in-out 3;
   }
-}
+
+  .type-cursor-hidden {
+    animation: none;
+    opacity: 0;
+  }
+
+  .variant-value {
+    display: inline-flex;
+    align-items: baseline;
+    white-space: nowrap;
+    line-height: 1;
+  }
+
+  @keyframes cursor-phase {
+    0% {
+      opacity: 0.25;
+      transform: translateY(-0.02em) scaleY(0.94);
+    }
+    50% {
+      opacity: 1;
+      transform: translateY(-0.02em) scaleY(1);
+    }
+    100% {
+      opacity: 0.25;
+      transform: translateY(-0.02em) scaleY(0.94);
+    }
+  }
 </style>
