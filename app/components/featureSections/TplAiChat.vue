@@ -3,7 +3,7 @@
 </script>
 
 <template>
-  <section max-w-md>
+  <section>
     <h2>AI Chat</h2>
 
     <p>

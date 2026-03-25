@@ -3,7 +3,7 @@
 </script>
 
 <template>
-  <section max-w-md>
+  <section flex-grow>
     <h2>Errors shouldn't stress you out</h2>
     <p>
       Errors will still be visible, but the <em>squigly underlines</em> follow the same hue as the
@@ -44,7 +44,6 @@
 
   .errors-preview-shell {
     width: min(100%, 720px);
-    max-width: 100%;
     min-width: 320px;
     flex: 1 1 320px;
     /* aspect-ratio: 2045 / 1530; */

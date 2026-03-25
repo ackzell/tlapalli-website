@@ -3,7 +3,7 @@
 </script>
 
 <template>
-  <section max-w-md>
+  <section>
     <h2>Editor Widgets</h2>
 
     <p>

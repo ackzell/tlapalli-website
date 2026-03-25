@@ -12,7 +12,7 @@
     />
   </div>
 
-  <section max-w-md>
+  <section>
     <h2>Extensions</h2>
 
     <p>

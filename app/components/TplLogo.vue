@@ -236,7 +236,7 @@
             :points="obsidian.outer"
             :style="{
               fill: logoColor('obsidian', 'bg'),
-              fillOpacity: 0,
+              fillOpacity: currentGem.variant === 'obsidian' ? 0.05 : 1,
               stroke: logoColor('obsidian', 'fg'),
               strokeWidth: obsidian.outerStrokeWidth,
               paintOrder: 'normal',
@@ -244,11 +244,19 @@
           />
           <polygon
             :points="obsidian.highlight"
-            :style="{ fill: logoColor('obsidian', 'fg'), fillOpacity: 1, stroke: 'none' }"
+            :style="{
+              fill: logoColor('obsidian', 'fg'),
+              fillOpacity: currentGem.variant === 'obsidian' ? 0.5 : 1,
+              stroke: 'none',
+            }"
           />
           <polygon
             :points="obsidian.facet"
-            :style="{ fill: logoColor('obsidian', 'mid'), fillOpacity: 1, stroke: 'none' }"
+            :style="{
+              fill: logoColor('obsidian', 'mid'),
+              fillOpacity: currentGem.variant === 'obsidian' ? 0.05 : 1,
+              stroke: 'none',
+            }"
           />
         </g>
       </g>

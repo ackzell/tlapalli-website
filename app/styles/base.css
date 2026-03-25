@@ -1,6 +1,8 @@
 * {
   -webkit-tap-highlight-color: transparent;
   tap-highlight-color: transparent;
+
+  outline: 1px solid tomato;
 }
 
 body,
@@ -30,4 +32,22 @@ h6 {
 
 small {
   font-size: 0.5em;
+}
+
+a {
+  color: inherit;
+  --uno: underline-current decoration-dotted;
+
+  &:hover {
+    --uno: opacity-70;
+  }
+
+  &:visited {
+    --uno: opacity-60;
+  }
+}
+
+p {
+  max-width: 48ch;
+  text-wrap-style: pretty;
 }

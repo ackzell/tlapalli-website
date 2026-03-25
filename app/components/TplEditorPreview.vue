@@ -4,6 +4,7 @@
 
 <template>
   <TplVariantModeImageSwap
+    class="editor-preview"
     image-section="variants"
     alt="Preview of the Tlapalli VSCode theme variant."
   >

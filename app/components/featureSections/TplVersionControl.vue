@@ -12,7 +12,7 @@
     />
   </div>
 
-  <section max-w-md>
+  <section>
     <h2>Version Control</h2>
 
     <p>

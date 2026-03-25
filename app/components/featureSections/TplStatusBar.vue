@@ -3,7 +3,7 @@
 </script>
 
 <template>
-  <section max-w-md>
+  <section>
     <h2>Status Bar</h2>
 
     <p>

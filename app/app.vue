@@ -1,6 +1,6 @@
 <script setup lang="ts">
   import './styles/base.css';
-  import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+  import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 
   import { themePalette } from './models/variants';
   import TplAiChat from '@/components/featureSections/TplAiChat.vue';
@@ -14,15 +14,15 @@
   import { useThemeVariant } from '@/composables/useThemeVariant';
 
   const { variant } = useThemeVariant({ defaultVariant: 'obsidian' });
+  const { $anime } = useNuxtApp();
   const {
     resolvedMode,
     value: colorModeValue,
     preference: colorModePreference,
-    hasStoredPreference,
   } = useResolvedColorMode();
 
 
-  const showDebugBadge = import.meta.dev && false;
+  // ─── Color mode badge sync ────────────────────────────────────────────────
   const osPrefersDark = ref<boolean | null>(null);
   const storedColorMode = ref<string | null>(null);
 
@@ -37,34 +37,25 @@
     };
 
 
-    const handleMediaChange = () => {
-      syncBadgeState();
-    };
-
-
     onMounted(() => {
       syncBadgeState();
-      mediaQuery.addEventListener('change', handleMediaChange);
+      mediaQuery.addEventListener('change', syncBadgeState);
     });
 
 
     watch(
       [() => colorModePreference.value, () => colorModeValue.value, () => resolvedMode.value],
-      () => {
-        syncBadgeState();
-      },
+      syncBadgeState,
     );
 
 
     onBeforeUnmount(() => {
-      mediaQuery.removeEventListener('change', handleMediaChange);
+      mediaQuery.removeEventListener('change', syncBadgeState);
     });
   }
 
 
-  const sampleImageSrc = computed(
-    () => `images/variants/${variant.value}${resolvedMode.value}.png`,
-  );
+  // ─── Theme-derived classes ────────────────────────────────────────────────
 
 
   const surfaceClass = computed(() => {
@@ -93,88 +84,146 @@
 
   const boxShadow = computed(() => {
     const mode = resolvedMode.value.toLowerCase();
-    console.log(mode, shadowColor.value);
     return mode === 'dark'
       ? `0 12px 12px color-mix(in srgb, ${shadowColor.value} 90%, transparent)`
       : `0 6px 12px color-mix(in srgb, ${shadowColor.value} 45%, transparent)`;
   });
+
+
+  // ─── Scroll reveals ───────────────────────────────────────────────────────
+
+
+  /**
+   * Modern browsers (Chrome 115+, Firefox 110+, Safari 18+) support
+   * `animation-timeline: view()` natively — zero JS needed there.
+   *
+   * For older browsers (notably Safari < 18) we fall back to
+   * useIntersectionObserver + CSS transitions.
+   */
+  const supportsViewTimeline = import.meta.client
+    ? CSS.supports('animation-timeline', 'view()')
+    : true; // SSR: assume support so we don't inject JS unnecessarily
+
+
+  function setupScrollRevealFallback(targets: HTMLElement[]) {
+    for (const el of targets) {
+      el.classList.add('scroll-reveal-pending');
+
+
+      const { stop } = useIntersectionObserver(
+        el,
+        (entries) => {
+          const entry = entries[0];
+          if (!entry?.isIntersecting) return;
+          el.classList.remove('scroll-reveal-pending');
+          el.classList.add('scroll-reveal-done');
+          stop();
+        },
+        { threshold: 0.2, rootMargin: '0px 0px -8% 0px' },
+      );
+    }
+  }
+
+
+  async function setupScrollReveals() {
+    if (!import.meta.client || supportsViewTimeline) return;
+
+
+    await nextTick();
+    const targets = Array.from(document.querySelectorAll<HTMLElement>('[data-scroll-reveal]'));
+    if (targets.length) setupScrollRevealFallback(targets);
+  }
+
+
+  // ─── Intro animation ──────────────────────────────────────────────────────
+
+
+  const showContent = ref(false);
+  const startMenuRotation = ref(false);
+
+
+  async function onGemsRevealed() {
+    // $anime({
+    //   targets: 'nav',
+    //   opacity: [0, 1],
+    //   translateY: [-40, 0],
+    //   duration: 800,
+    //   easing: 'easeInOutCubic',
+    //   complete() {
+    //     showContent.value = true;
+    //   },
+    // });
+  }
+
+
+  async function onLogoIntroFinished() {
+    // if (hasRunInitialReveal.value) return;
+    // hasRunInitialReveal.value = true;
+    // await nextTick();
+    // if (!editorPreviewSectionRef.value) return;
+    // $anime.set(editorPreviewSectionRef.value, { opacity: 0, translateY: 30 });
+    // $anime({
+    //   targets: editorPreviewSectionRef.value,
+    //   opacity: [0, 1],
+    //   translateY: [30, 0],
+    //   duration: 620,
+    //   easing: 'easeOutCubic',
+    //   complete: setupScrollReveals,
+    // });
+  }
+
+
+  async function onMenuPositioned() {
+    await nextTick();
+
+
+    $anime({
+      targets: 'nav',
+      opacity: [0, 1],
+      translateY: [-40, 0],
+      duration: 800,
+      easing: 'easeInOutCubic',
+      async complete() {
+        await nextTick();
+        showContent.value = true;
+
+        $anime({
+          targets: '.editor-preview',
+          opacity: [0, 1],
+          translateY: [30, 0],
+          duration: 620,
+          easing: 'easeOutCubic',
+          complete: setupScrollReveals,
+        });
+
+        useTimeoutFn(() => {
+          startMenuRotation.value = true;
+        }, 200);
+      },
+    });
+  }
 </script>
+
 <template>
   <ColorScheme>
     <div
-      id="page"
-      m-0
-      p-0
-      min-h-screen
       :class="[surfaceClass, selectionClass]"
       :style="{ transition: 'background-color 260ms ease, color 260ms ease' }"
-      flex="~ col gap-2"
     >
-      <TplMenu />
+      <TplNavBar opacity-0 />
 
-      <nav
-        flex="~"
-        items-center
-        justify-between
-        px-4
-        py-2
-        relative
-        border="b-solid b-1"
-        :class="borderClass"
-        sticky
-        top-0
-        z-10
-        backdrop-blur-md
-        class="scroll-shadow-nav"
-      >
-        <h1 font-serif>Tlapalli <small font-sans opacity-80 text-sm>VSCode Theme</small></h1>
+      <div id="page" m-0 p-0 flex="~ col gap-2">
+        <TplMenu
+          :start-menu-rotation="startMenuRotation"
+          @gems-revealed="onGemsRevealed"
+          @intro-finished="onLogoIntroFinished"
+          @menu-positioned="onMenuPositioned"
+        />
 
-        <div
-          md:absolute
-          w-max
-          pointer-events-none
-          class="md:-translate-x-1/2 md:-translate-y-1/2 md:left-1/2 md:top-1/2"
-        >
-          <div relative flex="~" items-center justify-center>
-            <span
-              font-mono
-              absolute
-              right-40px
-              opacity-0
-              md:opacity-100
-              transition-opacity
-              duration-250
-            >
-              selected:
-            </span>
-            <div hidden absolute md:inline>
-              <TplCurrentVariantGem />
-            </div>
-            <TplCurrentVariantName font-mono absolute -left-50px class="md:left-40px" />
-          </div>
-        </div>
-
-        <TplColorModeToggle />
-      </nav>
-
-      <h2 self-center py-5>Tlapalli means "color" in Nahuatl</h2>
-
-      <main px-12 pb-36 relative flex="~ col gap-12 justify-center items-center">
         <section
-          p-4
-          w="full sm:60vw md:70vw"
-          max-w="screen"
-          rounded-lg
-          flex
-          items-center
-          justify-center
-          border-solid
-          :class="borderClass"
+          data-scroll-reveal
+          class="absolute left-0 top-7/3 w-5% activity-bar-preview-shell z-0"
         >
-          <TplEditorPreview />
-        </section>
-
-        <section class="absolute left-0 top-1/3 w-5% activity-bar-preview-shell z-0">
           <TplVariantModeImageSwap
             image-section="activityBar"
             alt="Preview of activity bar styling for the selected theme variant."
@@ -182,165 +231,184 @@
           />
         </section>
 
-        <section
-          p-4
-          lg:border-none
-          rounded-lg
-          border-solid
-          :class="borderClass"
-          flex
-          items-center
-          justify-center
-          gap-8
-          flex-wrap
-          w="full sm:60vw md:70vw"
-        >
-          <div>
-            <h2>A monochromatic, distraction free theme</h2>
-
-            <p>
-              It will allow you to focus on the coding experience and reduce the amount of things
-              trying to get your attention in the editor.
-            </p>
-
-            <p>
-              I have personally felt less fatigued especially when using the dark modes on low light
-              conditions.
-            </p>
-
-            <p>
-              The light themes will provide a comfortable coding experience in well-lit
-              environments.
-            </p>
-          </div>
-        </section>
-
-        <section
-          p-4
-          lg:border-none
-          rounded-lg
-          border-solid
-          :class="borderClass"
-          flex
-          items-center
-          justify-center
-          gap-8
-          flex-wrap
-          w="full sm:60vw md:70vw"
-        >
-          <TplErrors />
-        </section>
-
-        <section
-          p-4
-          lg:border-none
-          rounded-lg
-          border-solid
-          :class="borderClass"
-          flex
-          items-center
-          justify-center
-          gap-8
-          flex-wrap
-          w="full sm:60vw md:70vw"
-        >
-          <TplVersionControl />
-        </section>
-
-        <div
-          flex
-          flex-col
-          gap-12
-          lg:gap-8
-          lg:flex-row
-          justify-center
-          items-center
-          w="sm:60vw md:70vw"
-        >
-          <section
-            p-4
-            lg:border-none
-            rounded-lg
-            border-solid
-            :class="borderClass"
-            flex
-            items-center
-            justify-center
-            gap-8
-            flex-wrap
-            w-full
-          >
-            <TplAiChat />
+        <div flex flex-col items-center px-12 :style="{ opacity: showContent ? 1 : 0 }">
+          <section px-8 min-h-screen flex flex-col gap-12 w="full sm:60vw md:70vw">
+            <h2 data-scroll-reveal text-center p-0 xl:my-0 class="my-25%">
+              Tlapalli means "color" in Náhuatl
+            </h2>
+            <TplEditorPreview />
           </section>
 
-          <section
-            p-4
-            lg:border-none
-            rounded-lg
-            border-solid
-            :class="borderClass"
-            flex
-            items-center
-            justify-center
-            gap-8
-            flex-wrap
-            w-full
-          >
-            <TplExtensions />
-          </section>
+          <main w-full px-12 pt-24 pb-36 flex="~ col gap-12 justify-center items-center">
+            <section
+              data-scroll-reveal
+              p-4
+              lg:border-none
+              rounded-lg
+              border-solid
+              :class="borderClass"
+            >
+              <h2>A monochromatic, distraction free theme</h2>
+              <p>
+                It will allow you to focus on the coding experience and reduce the amount of things
+                trying to get your attention in the editor.
+              </p>
+              <p>
+                I have personally felt less fatigued especially when using the dark modes on low
+                light conditions.
+              </p>
+              <p>
+                The light themes will provide a comfortable coding experience in well-lit
+                environments.
+              </p>
+            </section>
+            <!-- <section
+              data-scroll-reveal
+              p-4
+              lg:border-none
+              rounded-lg
+              border-solid
+              :class="borderClass"
+              flex
+              flex-col
+              lg:flex-row
+              items-center
+              justify-center
+              gap-8
+              flex-wrap
+            >
+              <TplErrors />
+            </section>
+            <section
+              data-scroll-reveal
+              p-4
+              lg:border-none
+              rounded-lg
+              border-solid
+              :class="borderClass"
+              flex
+              flex-col
+              lg:flex-row
+              items-center
+              justify-center
+              gap-8
+              flex-wrap
+            >
+              <TplVersionControl />
+            </section>
+            <div flex flex-col gap-12 lg:gap-8 lg:flex-row justify-center items-center>
+              <section
+                data-scroll-reveal
+                p-4
+                lg:border-none
+                rounded-lg
+                border-solid
+                :class="borderClass"
+                flex
+                items-center
+                justify-center
+                gap-8
+                flex-wrap
+              >
+                <TplAiChat />
+              </section>
+              <section
+                data-scroll-reveal
+                p-4
+                lg:border-none
+                rounded-lg
+                border-solid
+                :class="borderClass"
+                flex
+                items-center
+                justify-center
+                gap-8
+                flex-wrap
+              >
+                <TplExtensions />
+              </section>
+            </div>
+            <section
+              data-scroll-reveal
+              p-4
+              lg:border-none
+              rounded-lg
+              border-solid
+              :class="borderClass"
+              flex
+              flex-col
+              lg:flex-row
+              items-center
+              justify-center
+              gap-8
+              flex-wrap
+            >
+              <TplEditorWidgets />
+            </section>
+            <section
+              data-scroll-reveal
+              p-4
+              lg:border-none
+              rounded-lg
+              border-solid
+              flex
+              flex-col
+              :class="borderClass"
+            >
+              <TplStatusBar />
+            </section> -->
+          </main>
         </div>
-
-        <section
-          p-4
-          lg:border-none
-          rounded-lg
-          border-solid
-          :class="borderClass"
-          flex
-          items-center
-          justify-center
-          gap-8
-          flex-wrap
-          w="full sm:60vw md:70vw"
-        >
-          <TplEditorWidgets />
-        </section>
-
-        <section
-          p-4
-          lg:border-none
-          rounded-lg
-          border-solid
-          flex
-          flex-col
-          :class="borderClass"
-          w="full"
-        >
-          <TplStatusBar />
-        </section>
-      </main>
-
-      <footer>and then some</footer>
-
-      <aside v-if="showDebugBadge" class="dev-mode-badge" font-mono>
-        <div><strong>mode debug</strong></div>
-        <div>pref: {{ colorModePreference }}</div>
-        <div>value: {{ colorModeValue }}</div>
-        <div>resolved: {{ resolvedMode }}</div>
-        <div>osDark: {{ osPrefersDark }}</div>
-        <div>stored: {{ storedColorMode ?? 'null' }}</div>
-        <div>hasStored: {{ hasStoredPreference }}</div>
-        <div>variant: {{ variant }}</div>
-        <div>src: {{ sampleImageSrc }}</div>
-      </aside>
+      </div>
+      <footer data-scroll-reveal>and then some</footer>
     </div>
   </ColorScheme>
 </template>
 
 <style scoped>
+  /* ── Scroll-triggered reveal — CSS-native path (Chrome 115+, FF 110+, Safari 18+) ── */
+  @supports (animation-timeline: view()) {
+    @keyframes scroll-reveal {
+      from {
+        opacity: 0;
+        translate: 0 52px;
+      }
+      to {
+        opacity: 1;
+        translate: 0 0;
+      }
+    }
+
+    [data-scroll-reveal] {
+      animation: scroll-reveal linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 30%;
+    }
+  }
+
+  /* ── Scroll-triggered reveal — VueUse/IntersectionObserver fallback path ── */
+  @supports not (animation-timeline: view()) {
+    .scroll-reveal-pending {
+      opacity: 0;
+      translate: 0 52px;
+      transition:
+        opacity 650ms cubic-bezier(0.215, 0.61, 0.355, 1),
+        translate 650ms cubic-bezier(0.215, 0.61, 0.355, 1);
+    }
+
+    .scroll-reveal-done {
+      opacity: 1;
+      translate: 0 0;
+      transition:
+        opacity 650ms cubic-bezier(0.215, 0.61, 0.355, 1),
+        translate 650ms cubic-bezier(0.215, 0.61, 0.355, 1);
+    }
+  }
+
+  /* ── Nav scroll shadow ── */
   .scroll-shadow-nav {
     animation: scroll-shadow linear forwards;
-    animation-timeline: scroll(root block);
+    animation-timeline: scroll();
     animation-range: 0% 1vh;
   }
 
@@ -353,25 +421,9 @@
     }
   }
 
+  /* ── Activity bar fade mask ── */
   .activity-bar-preview-shell {
     -webkit-mask-image: linear-gradient(to top, transparent 10%, black 100%);
     mask-image: linear-gradient(to top, transparent 10%, black 100%);
-  }
-
-  .dev-mode-badge {
-    position: fixed;
-    right: 0.75rem;
-    bottom: 0.75rem;
-    z-index: 100;
-    pointer-events: none;
-    border: 1px solid currentColor;
-    background: color-mix(in srgb, currentColor 10%, transparent);
-    backdrop-filter: blur(6px);
-    border-radius: 0.5rem;
-    padding: 0.5rem 0.625rem;
-    font-size: 0.65rem;
-    line-height: 1.2;
-    max-width: min(92vw, 420px);
-    word-break: break-all;
   }
 </style>
