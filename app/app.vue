@@ -428,7 +428,7 @@
 
 
     $anime({
-      targets: 'nav',
+      targets: 'header',
       opacity: [0, 1],
       translateY: [-40, 0],
       duration: 800,
@@ -460,7 +460,7 @@
       :class="[surfaceClass, selectionClass]"
       :style="{ transition: 'background-color 260ms ease, color 260ms ease' }"
     >
-      <TplNavBar opacity-0 />
+      <TplHeader opacity-0 />
 
       <div id="page" m-0 p-0 flex="~ col gap-2" relative>
         <TplMenu
@@ -831,8 +831,7 @@
     }
   }
 
-  /* ── Nav scroll shadow ── */
-  .scroll-shadow-nav {
+  .scroll-shadow-header {
     animation: scroll-shadow linear forwards;
     animation-timeline: scroll();
     animation-range: 0% 1vh;

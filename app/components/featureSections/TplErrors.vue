@@ -4,9 +4,7 @@
 
 <template>
   <section>
-    <h2 data-scroll-reveal data-reveal-role="heading" data-reveal-style="snap-up">
-      Errors shouldn't stress you out
-    </h2>
+    <h2 data-scroll-reveal data-reveal-role="heading" data-reveal-style="snap-up">Tamed Errors</h2>
     <p data-scroll-reveal data-reveal-role="paragraph" data-reveal-style="snap-up">
       Errors will still be visible, but the <em>squigly underlines</em> follow the same hue as the
       text for this theme*.
