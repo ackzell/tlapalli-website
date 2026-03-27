@@ -35,7 +35,7 @@
     class="errors-preview-shell"
     data-scroll-reveal
     data-reveal-role="image"
-    data-reveal-style="tilt-in"
+    data-reveal-direction="up"
   >
     <TplVariantModeImageSwap
       image-section="errors"
@@ -54,11 +54,11 @@
   .errors-preview-shell {
     -webkit-mask-image:
       linear-gradient(to top, transparent 5%, black 60%),
-      linear-gradient(to right, transparent 0%, black 15%, black 85%, transparent 100%);
+      linear-gradient(to right, transparent 0%, black 10%, black 93%, transparent 100%);
     -webkit-mask-composite: source-in; /* Safari uses different keyword */
     mask-image:
       linear-gradient(to top, transparent 5%, black 60%),
-      linear-gradient(to right, transparent 0%, black 15%, black 85%, transparent 100%);
+      linear-gradient(to right, transparent 0%, black 10%, black 93%, transparent 100%);
     mask-composite: intersect;
   }
 </style>

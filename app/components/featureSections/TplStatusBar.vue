@@ -13,12 +13,7 @@
     </p>
   </section>
 
-  <div
-    class="preview-shell"
-    data-scroll-reveal
-    data-reveal-role="image"
-    data-reveal-style="float-up"
-  >
+  <div class="preview-shell" data-scroll-reveal data-reveal-role="image" data-reveal-direction="up">
     <TplVariantModeImageSwap
       image-section="statusBar"
       alt="Preview of status bar styling for the selected theme variant."

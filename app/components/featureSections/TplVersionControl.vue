@@ -3,12 +3,7 @@
 </script>
 
 <template>
-  <div
-    class="preview-shell"
-    data-scroll-reveal
-    data-reveal-role="image"
-    data-reveal-style="drift-left"
-  >
+  <div class="preview-shell" data-scroll-reveal data-reveal-role="image" data-reveal-direction="up">
     <TplVariantModeImageSwap
       image-section="versionControl"
       alt="Preview of version control styling for the selected theme variant."

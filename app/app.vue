@@ -119,6 +119,7 @@
   const headingRevealState = new WeakMap<HTMLElement, 'hidden' | 'visible'>();
   const headingRevealAnimations = new WeakMap<HTMLElement, { pause: () => void }>();
   const headingRevealStops: Array<() => void> = [];
+  const enableImageReveals = true;
   const enableNonHeadingReveals = false;
 
 
@@ -181,6 +182,8 @@
     for (const target of targets) {
       const { el, role, delayMs } = target;
       if (role === 'heading') continue;
+      if (role === 'image' && !enableImageReveals) continue;
+      if (role !== 'image' && !enableNonHeadingReveals) continue;
 
 
       el.classList.add('scroll-reveal-pending');
@@ -362,10 +365,10 @@
     if (supportsViewTimeline) return;
 
 
-    if (!enableNonHeadingReveals) return;
-
-
-    const targets = collectScrollRevealTargets();
+    const targets = collectScrollRevealTargets().filter(({ role }) => {
+      if (role === 'image') return enableImageReveals;
+      return enableNonHeadingReveals;
+    });
     if (targets.length) setupScrollRevealFallback(targets);
   }
 
@@ -470,7 +473,7 @@
         <section
           data-scroll-reveal
           data-reveal-role="image"
-          data-reveal-style="glide-left"
+          data-reveal-direction="left"
           class="absolute left-0 top-53% w-5% activity-bar-preview-shell z-0"
         >
           <TplVariantModeImageSwap
@@ -629,7 +632,31 @@
       --scroll-reveal-x: 18px;
       --scroll-reveal-y: 0;
       --scroll-reveal-scale: 0.965;
-      animation-range: entry 88% contain 28%;
+      animation-range: entry 95% contain 35%;
+    }
+
+    :deep([data-scroll-reveal][data-reveal-role='image'][data-reveal-direction='left']) {
+      --scroll-reveal-x: -36px;
+      --scroll-reveal-y: 0;
+    }
+
+    :deep([data-scroll-reveal][data-reveal-role='image'][data-reveal-direction='right']) {
+      --scroll-reveal-x: 36px;
+      --scroll-reveal-y: 0;
+    }
+
+    :deep([data-scroll-reveal][data-reveal-role='image'][data-reveal-direction='up']) {
+      --scroll-reveal-x: 0;
+      --scroll-reveal-y: -36px;
+    }
+
+    :deep([data-scroll-reveal][data-reveal-role='image'][data-reveal-direction='down']) {
+      --scroll-reveal-x: 0;
+      --scroll-reveal-y: 36px;
+    }
+
+    :deep([data-scroll-reveal][data-reveal-role='image'][data-reveal-size='tall']) {
+      animation-range: entry 40% cover 35%;
     }
 
     :deep([data-scroll-reveal][data-reveal-role='generic']) {
@@ -644,13 +671,13 @@
     }
 
     :deep([data-scroll-reveal][data-reveal-style='drift-left']) {
-      --scroll-reveal-x: -22px;
+      --scroll-reveal-x: -36px;
       --scroll-reveal-y: 6px;
       --scroll-reveal-scale: 0.97;
     }
 
     :deep([data-scroll-reveal][data-reveal-style='drift-right']) {
-      --scroll-reveal-x: 22px;
+      --scroll-reveal-x: 36px;
       --scroll-reveal-y: 6px;
       --scroll-reveal-scale: 0.97;
     }
@@ -685,7 +712,7 @@
       --scroll-reveal-duration: 520ms;
     }
 
-    :deep([data-scroll-reveal]:not([data-reveal-role='heading'])) {
+    :deep([data-scroll-reveal]:not([data-reveal-role='heading']):not([data-reveal-role='image'])) {
       animation: none;
       opacity: 1;
       transform: none;
@@ -720,6 +747,26 @@
       --scroll-reveal-x: 18px;
       --scroll-reveal-y: 0;
       --scroll-reveal-scale: 0.965;
+    }
+
+    :deep(.scroll-reveal-pending.scroll-reveal-role-image[data-reveal-direction='left']) {
+      --scroll-reveal-x: -36px;
+      --scroll-reveal-y: 0;
+    }
+
+    :deep(.scroll-reveal-pending.scroll-reveal-role-image[data-reveal-direction='right']) {
+      --scroll-reveal-x: 36px;
+      --scroll-reveal-y: 0;
+    }
+
+    :deep(.scroll-reveal-pending.scroll-reveal-role-image[data-reveal-direction='up']) {
+      --scroll-reveal-x: 0;
+      --scroll-reveal-y: -36px;
+    }
+
+    :deep(.scroll-reveal-pending.scroll-reveal-role-image[data-reveal-direction='down']) {
+      --scroll-reveal-x: 0;
+      --scroll-reveal-y: 36px;
     }
 
     :deep(.scroll-reveal-pending.scroll-reveal-role-generic) {

@@ -14,12 +14,7 @@
     </p>
   </section>
 
-  <div
-    class="preview-shell"
-    data-scroll-reveal
-    data-reveal-role="image"
-    data-reveal-style="float-up"
-  >
+  <div class="preview-shell" data-scroll-reveal data-reveal-role="image" data-reveal-direction="up">
     <TplVariantModeImageSwap
       image-section="editorWidgets"
       alt="Preview of editor widgets styling for the selected theme variant."

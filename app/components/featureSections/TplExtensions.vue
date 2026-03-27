@@ -7,7 +7,8 @@
     class="preview-shell"
     data-scroll-reveal
     data-reveal-role="image"
-    data-reveal-style="drift-right"
+    data-reveal-direction="left"
+    data-reveal-size="tall"
   >
     <TplVariantModeImageSwap
       image-section="extensions"

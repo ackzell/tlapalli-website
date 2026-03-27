@@ -17,7 +17,8 @@
     class="preview-shell"
     data-scroll-reveal
     data-reveal-role="image"
-    data-reveal-style="drift-left"
+    data-reveal-direction="right"
+    data-reveal-size="tall"
   >
     <TplVariantModeImageSwap
       image-section="aiChat"
