@@ -3,7 +3,7 @@
 </script>
 
 <template>
-  <section flex-grow>
+  <section>
     <h2>Errors shouldn't stress you out</h2>
     <p>
       Errors will still be visible, but the <em>squigly underlines</em> follow the same hue as the
@@ -21,10 +21,12 @@
       extension, you will have more control on how you want your errors to yell at you.
     </p>
 
-    *<small
-      >Except for the `fireOpal` themes, where error related UI elements are white for the dark
-      version and dark gray for the light version.</small
-    >
+    <p>
+      *<small
+        >Except for the `fireOpal` themes, where error related UI elements are white for the dark
+        version and dark gray for the light version.</small
+      >
+    </p>
   </section>
 
   <div class="errors-preview-shell">
@@ -43,19 +45,13 @@
   }
 
   .errors-preview-shell {
-    width: min(100%, 720px);
-    min-width: 320px;
-    flex: 1 1 320px;
-    /* aspect-ratio: 2045 / 1530; */
-    /* flex: 0 0 auto; */
-    /* transform: perspective(1200px) rotateX(45deg) rotateY(18deg) rotate(-18deg); */
-    transform-origin: center center;
-    will-change:
-      transform,
-      mask-image,
-      -webkit-mask-image;
-
-    -webkit-mask-image: linear-gradient(to top, transparent 5%, black 60%);
-    mask-image: linear-gradient(to top, transparent 5%, black 60%);
+    -webkit-mask-image:
+      linear-gradient(to top, transparent 5%, black 60%),
+      linear-gradient(to right, transparent 0%, black 15%, black 85%, transparent 100%);
+    -webkit-mask-composite: source-in; /* Safari uses different keyword */
+    mask-image:
+      linear-gradient(to top, transparent 5%, black 60%),
+      linear-gradient(to right, transparent 0%, black 15%, black 85%, transparent 100%);
+    mask-composite: intersect;
   }
 </style>

@@ -24,15 +24,6 @@
 
 <style scoped>
   .preview-shell {
-    width: min(100%, 720px);
-    max-width: 100%;
-    min-width: 320px;
-    aspect-ratio: 3461 / 1404;
-    flex: 1 1 320px;
-    /* transform: perspective(1200px) rotateX(45deg) rotateY(18deg) rotate(-18deg); */
-    transform-origin: center center;
-    will-change: transform;
-
     -webkit-mask-image: linear-gradient(to top, transparent 5%, black 40%);
     mask-image: linear-gradient(to top, transparent 5%, black 40%);
   }

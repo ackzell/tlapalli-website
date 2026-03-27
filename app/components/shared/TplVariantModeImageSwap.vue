@@ -15,7 +15,7 @@
     }>(),
     {
       alt: undefined,
-      sizes: '(max-width: 640px) 100vw, (max-width: 768px) 60vw, 70vw',
+      sizes: '',
       densities: 'x1 x2',
     },
   );
@@ -65,7 +65,8 @@
   .preview-image {
     display: block;
     width: 100%;
-    max-width: 100%;
-    height: auto;
+    height: 100%; /* fill the shell's fixed height */
+    object-fit: cover;
+    object-position: bottom left; /* show the bottom left of the image */
   }
 </style>

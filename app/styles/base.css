@@ -2,7 +2,10 @@
   -webkit-tap-highlight-color: transparent;
   tap-highlight-color: transparent;
 
-  outline: 1px solid tomato;
+  /* outline: 1px solid tomato; */
+  /* main {
+    outline: 1px solid tomato;
+  } */
 }
 
 body,
@@ -13,6 +16,11 @@ html {
   --uno: font-serif;
 
   color-scheme: dark light;
+
+  scroll-snap-type: y mandatory;
+  scroll-padding-top: 5rem;
+
+  /* --uno: lg: snap-none; */
 }
 
 button {

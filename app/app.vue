@@ -2,6 +2,7 @@
   import './styles/base.css';
   import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 
+  import TplFeatureSectionWrapper from './components/featureSections/TplFeatureSectionWrapper.vue';
   import { themePalette } from './models/variants';
   import TplAiChat from '@/components/featureSections/TplAiChat.vue';
   import TplEditorWidgets from '@/components/featureSections/TplEditorWidgets.vue';
@@ -212,7 +213,7 @@
     >
       <TplNavBar opacity-0 />
 
-      <div id="page" m-0 p-0 flex="~ col gap-2">
+      <div id="page" m-0 p-0 flex="~ col gap-2" relative>
         <TplMenu
           :start-menu-rotation="startMenuRotation"
           @gems-revealed="onGemsRevealed"
@@ -222,7 +223,7 @@
 
         <section
           data-scroll-reveal
-          class="absolute left-0 top-7/3 w-5% activity-bar-preview-shell z-0"
+          class="absolute left-0 top-53% w-5% activity-bar-preview-shell z-0"
         >
           <TplVariantModeImageSwap
             image-section="activityBar"
@@ -231,15 +232,24 @@
           />
         </section>
 
-        <div flex flex-col items-center px-12 :style="{ opacity: showContent ? 1 : 0 }">
-          <section px-8 min-h-screen flex flex-col gap-12 w="full sm:60vw md:70vw">
-            <h2 data-scroll-reveal text-center p-0 xl:my-0 class="my-25%">
+        <div
+          flex
+          flex-col
+          items-center
+          justify-center
+          px-12
+          gap-12
+          :style="{ opacity: showContent ? 1 : 0 }"
+          snap-start
+        >
+          <section px-8 pb-2 flex flex-col gap-12 w="full sm:60vw md:70vw" h-dvh lg:justify-evenly>
+            <h2 data-scroll-reveal text-center p-0 pt-6 md:my-0 class="my-25%">
               Tlapalli means "color" in Náhuatl
             </h2>
             <TplEditorPreview />
           </section>
 
-          <main w-full px-12 pt-24 pb-36 flex="~ col gap-12 justify-center items-center">
+          <main snap-start snap-always pb-36 flex="~ col" gap-12>
             <section
               data-scroll-reveal
               p-4
@@ -247,6 +257,7 @@
               rounded-lg
               border-solid
               :class="borderClass"
+              class="md:px-10%"
             >
               <h2>A monochromatic, distraction free theme</h2>
               <p>
@@ -262,40 +273,15 @@
                 environments.
               </p>
             </section>
-            <!-- <section
-              data-scroll-reveal
-              p-4
-              lg:border-none
-              rounded-lg
-              border-solid
-              :class="borderClass"
-              flex
-              flex-col
-              lg:flex-row
-              items-center
-              justify-center
-              gap-8
-              flex-wrap
-            >
+
+            <TplFeatureSectionWrapper>
               <TplErrors />
-            </section>
-            <section
-              data-scroll-reveal
-              p-4
-              lg:border-none
-              rounded-lg
-              border-solid
-              :class="borderClass"
-              flex
-              flex-col
-              lg:flex-row
-              items-center
-              justify-center
-              gap-8
-              flex-wrap
-            >
+            </TplFeatureSectionWrapper>
+
+            <TplFeatureSectionWrapper>
               <TplVersionControl />
-            </section>
+            </TplFeatureSectionWrapper>
+
             <div flex flex-col gap-12 lg:gap-8 lg:flex-row justify-center items-center>
               <section
                 data-scroll-reveal
@@ -328,39 +314,18 @@
                 <TplExtensions />
               </section>
             </div>
-            <section
-              data-scroll-reveal
-              p-4
-              lg:border-none
-              rounded-lg
-              border-solid
-              :class="borderClass"
-              flex
-              flex-col
-              lg:flex-row
-              items-center
-              justify-center
-              gap-8
-              flex-wrap
-            >
+
+            <TplFeatureSectionWrapper>
               <TplEditorWidgets />
-            </section>
-            <section
-              data-scroll-reveal
-              p-4
-              lg:border-none
-              rounded-lg
-              border-solid
-              flex
-              flex-col
-              :class="borderClass"
-            >
+            </TplFeatureSectionWrapper>
+
+            <TplFeatureSectionWrapper>
               <TplStatusBar />
-            </section> -->
+            </TplFeatureSectionWrapper>
           </main>
         </div>
       </div>
-      <footer data-scroll-reveal>and then some</footer>
+      <footer snap-end data-scroll-reveal>footer here</footer>
     </div>
   </ColorScheme>
 </template>
@@ -423,6 +388,7 @@
 
   /* ── Activity bar fade mask ── */
   .activity-bar-preview-shell {
+    max-width: 5%;
     -webkit-mask-image: linear-gradient(to top, transparent 10%, black 100%);
     mask-image: linear-gradient(to top, transparent 10%, black 100%);
   }
