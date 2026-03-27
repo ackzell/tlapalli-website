@@ -4,12 +4,14 @@
 
 <template>
   <section>
-    <h2>Errors shouldn't stress you out</h2>
-    <p>
+    <h2 data-scroll-reveal data-reveal-role="heading" data-reveal-style="snap-up">
+      Errors shouldn't stress you out
+    </h2>
+    <p data-scroll-reveal data-reveal-role="paragraph" data-reveal-style="snap-up">
       Errors will still be visible, but the <em>squigly underlines</em> follow the same hue as the
       text for this theme*.
     </p>
-    <p>
+    <p data-scroll-reveal data-reveal-role="paragraph" data-reveal-style="snap-up">
       If you pair the theme with the excellent
       <a
         href="https://marketplace.visualstudio.com/items?itemName=usernamehw.errorlens"
@@ -21,7 +23,7 @@
       extension, you will have more control on how you want your errors to yell at you.
     </p>
 
-    <p>
+    <p data-scroll-reveal data-reveal-role="paragraph" data-reveal-style="snap-up" line-height-none>
       *<small
         >Except for the `fireOpal` themes, where error related UI elements are white for the dark
         version and dark gray for the light version.</small
@@ -29,7 +31,12 @@
     </p>
   </section>
 
-  <div class="errors-preview-shell">
+  <div
+    class="errors-preview-shell"
+    data-scroll-reveal
+    data-reveal-role="image"
+    data-reveal-style="tilt-in"
+  >
     <TplVariantModeImageSwap
       image-section="errors"
       alt="Preview of error styling for the selected theme variant."

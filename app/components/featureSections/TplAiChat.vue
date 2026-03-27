@@ -4,16 +4,21 @@
 
 <template>
   <section>
-    <h2>AI Chat</h2>
+    <h2 data-scroll-reveal data-reveal-role="heading" data-reveal-style="lift-soft">AI Chat</h2>
 
-    <p>
+    <p data-scroll-reveal data-reveal-role="paragraph" data-reveal-style="lift-soft">
       The AI chat panel inherits the color palette of the theme. It should be easy to interact with
       it and perform the usual actions like typing messages, clicking buttons, and reading
       responses, without any color related issues.
     </p>
   </section>
 
-  <div class="preview-shell">
+  <div
+    class="preview-shell"
+    data-scroll-reveal
+    data-reveal-role="image"
+    data-reveal-style="drift-left"
+  >
     <TplVariantModeImageSwap
       image-section="aiChat"
       alt="Preview of AI chat styling for the selected theme variant."

@@ -106,9 +106,86 @@
     : true; // SSR: assume support so we don't inject JS unnecessarily
 
 
-  function setupScrollRevealFallback(targets: HTMLElement[]) {
-    for (const el of targets) {
+  type ScrollRevealRole = 'heading' | 'paragraph' | 'image' | 'generic';
+
+
+  type ScrollRevealTarget = {
+    el: HTMLElement;
+    role: ScrollRevealRole;
+    delayMs: number;
+  };
+
+
+  const headingRevealState = new WeakMap<HTMLElement, 'hidden' | 'visible'>();
+  const headingRevealAnimations = new WeakMap<HTMLElement, { pause: () => void }>();
+  const headingRevealStops: Array<() => void> = [];
+  const enableNonHeadingReveals = false;
+
+
+  function getRevealRole(el: HTMLElement): ScrollRevealRole {
+    const roleFromData = el.dataset.revealRole;
+
+
+    if (roleFromData === 'heading') return 'heading';
+    if (roleFromData === 'paragraph') return 'paragraph';
+    if (roleFromData === 'image') return 'image';
+    if (roleFromData === 'generic') return 'generic';
+
+
+    if (el.matches('h1, h2, h3, h4, h5, h6')) return 'heading';
+    if (el.matches('p')) return 'paragraph';
+    if (
+      el.matches('img, picture, .preview-shell, .errors-preview-shell, .activity-bar-preview-shell')
+    ) {
+      return 'image';
+    }
+
+
+    return 'generic';
+  }
+
+
+  function getRevealDelay(role: ScrollRevealRole, roleIndex: number) {
+    if (role === 'heading') return roleIndex * 40;
+    if (role === 'paragraph') return 80 + roleIndex * 60;
+    if (role === 'image') return 160 + roleIndex * 70;
+    return 100 + roleIndex * 50;
+  }
+
+
+  function collectScrollRevealTargets() {
+    const roleIndexMap: Record<ScrollRevealRole, number> = {
+      heading: 0,
+      paragraph: 0,
+      image: 0,
+      generic: 0,
+    };
+
+
+    const targets = Array.from(document.querySelectorAll<HTMLElement>('[data-scroll-reveal]'));
+    return targets.map((el) => {
+      const role = getRevealRole(el);
+      const roleIndex = roleIndexMap[role];
+      roleIndexMap[role] += 1;
+
+      return {
+        el,
+        role,
+        delayMs: getRevealDelay(role, roleIndex),
+      };
+    });
+  }
+
+
+  function setupScrollRevealFallback(targets: ScrollRevealTarget[]) {
+    for (const target of targets) {
+      const { el, role, delayMs } = target;
+      if (role === 'heading') continue;
+
+
       el.classList.add('scroll-reveal-pending');
+      el.classList.add(`scroll-reveal-role-${role}`);
+      el.style.setProperty('--scroll-reveal-delay', `${delayMs}ms`);
 
 
       const { stop } = useIntersectionObserver(
@@ -120,20 +197,189 @@
           el.classList.add('scroll-reveal-done');
           stop();
         },
-        { threshold: 0.2, rootMargin: '0px 0px -8% 0px' },
+        {
+          threshold: role === 'image' ? 0.62 : 0.52,
+          rootMargin: role === 'image' ? '0px 0px -34% 0px' : '0px 0px -28% 0px',
+        },
       );
     }
   }
 
 
+  function splitHeadingIntoChars(heading: HTMLElement) {
+    if (heading.dataset.charSplitReady === 'true') {
+      return Array.from(heading.querySelectorAll<HTMLElement>('.scroll-heading-char'));
+    }
+
+
+    const rawText = heading.textContent ?? '';
+    if (!rawText.trim()) return [];
+
+
+    heading.dataset.charSplitReady = 'true';
+    heading.setAttribute('aria-label', rawText);
+
+
+    const fragment = document.createDocumentFragment();
+    for (const char of Array.from(rawText)) {
+      if (char === ' ') {
+        fragment.append(document.createTextNode(' '));
+        continue;
+      }
+
+
+      const span = document.createElement('span');
+      span.className = 'scroll-heading-char';
+      span.setAttribute('aria-hidden', 'true');
+      span.textContent = char;
+      span.style.opacity = '0';
+      fragment.append(span);
+    }
+
+
+    heading.textContent = '';
+    heading.append(fragment);
+
+
+    return Array.from(heading.querySelectorAll<HTMLElement>('.scroll-heading-char'));
+  }
+
+
+  function runHeadingCharacterReveal(heading: HTMLElement, direction: 'in' | 'out') {
+    const chars = splitHeadingIntoChars(heading);
+    if (!chars.length) return;
+
+
+    const isDarkMode = resolvedMode.value.toLowerCase() === 'dark';
+    const hiddenBrightness = isDarkMode ? 0.55 : 1.45;
+    const fromBrightness = direction === 'in' ? hiddenBrightness : 1;
+    const toBrightness = direction === 'in' ? 1 : hiddenBrightness;
+    const fromOpacity = direction === 'in' ? 0 : 1;
+    const toOpacity = direction === 'in' ? 1 : 0;
+
+
+    headingRevealAnimations.get(heading)?.pause();
+
+
+    $anime.set(chars, {
+      opacity: fromOpacity,
+      filter: `brightness(${fromBrightness})`,
+    });
+
+
+    const animation = $anime({
+      targets: chars,
+      brightnessLevel: [fromBrightness, toBrightness],
+      opacity: [fromOpacity, toOpacity],
+      duration: direction === 'in' ? 560 : 420,
+      delay:
+        direction === 'in'
+          ? $anime.stagger(24, { start: 60 })
+          : $anime.stagger(14, { from: 'last' }),
+      easing: 'easeOutCubic',
+      update(animation) {
+        for (const item of animation.animatables) {
+          const target = item.target as HTMLElement & { brightnessLevel?: number };
+          const brightness =
+            typeof target.brightnessLevel === 'number' ? target.brightnessLevel : 1;
+          target.style.filter = `brightness(${brightness.toFixed(3)})`;
+        }
+      },
+      complete() {
+        for (const char of chars) {
+          const target = char as HTMLElement & { brightnessLevel?: number };
+          if (direction === 'in') {
+            target.style.filter = '';
+          }
+          delete target.brightnessLevel;
+        }
+        headingRevealState.set(heading, direction === 'in' ? 'visible' : 'hidden');
+      },
+    });
+
+
+    headingRevealAnimations.set(heading, animation as { pause: () => void });
+  }
+
+
+  function setupHeadingCharacterReveal() {
+    const headings = Array.from(
+      document.querySelectorAll<HTMLElement>('[data-scroll-reveal][data-reveal-role="heading"]'),
+    );
+
+
+    for (const heading of headings) {
+      if (heading.dataset.charRevealObserverAttached === 'true') continue;
+      heading.dataset.charRevealObserverAttached = 'true';
+
+
+      const chars = splitHeadingIntoChars(heading);
+      if (chars.length) {
+        const isDarkMode = resolvedMode.value.toLowerCase() === 'dark';
+        const startBrightness = isDarkMode ? 0.55 : 1.45;
+        $anime.set(chars, {
+          opacity: 0,
+          filter: `brightness(${startBrightness})`,
+        });
+        headingRevealState.set(heading, 'hidden');
+      }
+
+
+      const { stop } = useIntersectionObserver(
+        heading,
+        (entries) => {
+          const entry = entries[0];
+          if (!entry) return;
+
+          if (entry.isIntersecting) {
+            if (headingRevealState.get(heading) !== 'visible') {
+              runHeadingCharacterReveal(heading, 'in');
+            }
+            return;
+          }
+
+          if (headingRevealState.get(heading) !== 'hidden') {
+            runHeadingCharacterReveal(heading, 'out');
+          }
+        },
+        { threshold: 0.56, rootMargin: '0px 0px -24% 0px' },
+      );
+
+
+      headingRevealStops.push(stop);
+    }
+  }
+
+
   async function setupScrollReveals() {
-    if (!import.meta.client || supportsViewTimeline) return;
+    if (!import.meta.client) return;
 
 
     await nextTick();
-    const targets = Array.from(document.querySelectorAll<HTMLElement>('[data-scroll-reveal]'));
+    setupHeadingCharacterReveal();
+
+
+    if (supportsViewTimeline) return;
+
+
+    if (!enableNonHeadingReveals) return;
+
+
+    const targets = collectScrollRevealTargets();
     if (targets.length) setupScrollRevealFallback(targets);
   }
+
+
+  onBeforeUnmount(() => {
+    for (const stop of headingRevealStops) stop();
+    const headings = Array.from(
+      document.querySelectorAll<HTMLElement>('[data-scroll-reveal][data-reveal-role="heading"]'),
+    );
+    for (const heading of headings) {
+      headingRevealAnimations.get(heading)?.pause();
+    }
+    headingRevealStops.length = 0;
+  });
 
 
   // ─── Intro animation ──────────────────────────────────────────────────────
@@ -223,6 +469,8 @@
 
         <section
           data-scroll-reveal
+          data-reveal-role="image"
+          data-reveal-style="glide-left"
           class="absolute left-0 top-53% w-5% activity-bar-preview-shell z-0"
         >
           <TplVariantModeImageSwap
@@ -240,18 +488,16 @@
           px-12
           gap-12
           :style="{ opacity: showContent ? 1 : 0 }"
-          snap-start
         >
-          <section px-8 pb-2 flex flex-col gap-12 w="full sm:60vw md:70vw" h-dvh lg:justify-evenly>
-            <h2 data-scroll-reveal text-center p-0 pt-6 md:my-0 class="my-25%">
+          <section px-8 pb-2 flex flex-col gap-12 w="full sm:60vw md:70vw" lg:justify-evenly>
+            <h2 transition-opacity transition-discrete text-center p-0 pt-6 md:my-0 class="my-25%">
               Tlapalli means "color" in Náhuatl
             </h2>
             <TplEditorPreview />
           </section>
 
-          <main snap-start snap-always pb-36 flex="~ col" gap-12>
+          <main pb-36 flex="~ col" gap-12>
             <section
-              data-scroll-reveal
               p-4
               lg:border-none
               rounded-lg
@@ -259,16 +505,18 @@
               :class="borderClass"
               class="md:px-10%"
             >
-              <h2>A monochromatic, distraction free theme</h2>
-              <p>
+              <h2 data-scroll-reveal data-reveal-role="heading" data-reveal-style="lift-soft">
+                A monochromatic, distraction free theme
+              </h2>
+              <p data-scroll-reveal data-reveal-role="paragraph" data-reveal-style="lift-soft">
                 It will allow you to focus on the coding experience and reduce the amount of things
                 trying to get your attention in the editor.
               </p>
-              <p>
+              <p data-scroll-reveal data-reveal-role="paragraph" data-reveal-style="lift-soft">
                 I have personally felt less fatigued especially when using the dark modes on low
                 light conditions.
               </p>
-              <p>
+              <p data-scroll-reveal data-reveal-role="paragraph" data-reveal-style="lift-soft">
                 The light themes will provide a comfortable coding experience in well-lit
                 environments.
               </p>
@@ -284,7 +532,6 @@
 
             <div flex flex-col gap-12 lg:gap-8 lg:flex-row justify-center items-center>
               <section
-                data-scroll-reveal
                 p-4
                 lg:border-none
                 rounded-lg
@@ -299,7 +546,6 @@
                 <TplAiChat />
               </section>
               <section
-                data-scroll-reveal
                 p-4
                 lg:border-none
                 rounded-lg
@@ -325,48 +571,216 @@
           </main>
         </div>
       </div>
-      <footer snap-end data-scroll-reveal>footer here</footer>
+      <footer data-scroll-reveal data-reveal-role="generic" data-reveal-style="crisp">
+        footer here
+      </footer>
     </div>
   </ColorScheme>
 </template>
 
 <style scoped>
+  :deep([data-scroll-reveal][data-reveal-role='heading']:not([data-char-split-ready='true'])) {
+    visibility: hidden;
+  }
+
+  :deep(.scroll-heading-char) {
+    display: inline;
+    will-change: opacity, filter;
+  }
+
   /* ── Scroll-triggered reveal — CSS-native path (Chrome 115+, FF 110+, Safari 18+) ── */
   @supports (animation-timeline: view()) {
-    @keyframes scroll-reveal {
+    @keyframes scroll-reveal-soft-rise {
       from {
         opacity: 0;
-        translate: 0 52px;
+        transform: translate3d(var(--scroll-reveal-x, 0), var(--scroll-reveal-y, 18px), 0)
+          scale(var(--scroll-reveal-scale, 0.985)) rotate(var(--scroll-reveal-rotate, 0deg));
       }
       to {
         opacity: 1;
-        translate: 0 0;
+        transform: translate3d(0, 0, 0) scale(1) rotate(0deg);
       }
     }
 
-    [data-scroll-reveal] {
-      animation: scroll-reveal linear both;
+    :deep([data-scroll-reveal]) {
+      animation: scroll-reveal-soft-rise linear both;
       animation-timeline: view();
-      animation-range: entry 0% entry 30%;
+      animation-range: entry 80% contain 60%;
+    }
+
+    :deep([data-scroll-reveal][data-reveal-role='heading']) {
+      --scroll-reveal-y: 0;
+      --scroll-reveal-scale: 1;
+      --scroll-reveal-x: 0;
+      --scroll-reveal-rotate: 0deg;
+      animation: none;
+      opacity: 1;
+      transform: none;
+      animation-range: entry 82% contain 72%;
+    }
+
+    :deep([data-scroll-reveal][data-reveal-role='paragraph']) {
+      --scroll-reveal-y: 16px;
+      --scroll-reveal-scale: 0.985;
+      animation-range: entry 86% contain 58%;
+    }
+
+    :deep([data-scroll-reveal][data-reveal-role='image']) {
+      --scroll-reveal-x: 18px;
+      --scroll-reveal-y: 0;
+      --scroll-reveal-scale: 0.965;
+      animation-range: entry 88% contain 28%;
+    }
+
+    :deep([data-scroll-reveal][data-reveal-role='generic']) {
+      --scroll-reveal-y: 12px;
+      --scroll-reveal-scale: 0.99;
+      animation-range: entry 84% contain 55%;
+    }
+
+    :deep([data-scroll-reveal][data-reveal-style='lift-soft']:not([data-reveal-role='heading'])) {
+      --scroll-reveal-y: 20px;
+      --scroll-reveal-scale: 0.978;
+    }
+
+    :deep([data-scroll-reveal][data-reveal-style='drift-left']) {
+      --scroll-reveal-x: -22px;
+      --scroll-reveal-y: 6px;
+      --scroll-reveal-scale: 0.97;
+    }
+
+    :deep([data-scroll-reveal][data-reveal-style='drift-right']) {
+      --scroll-reveal-x: 22px;
+      --scroll-reveal-y: 6px;
+      --scroll-reveal-scale: 0.97;
+    }
+
+    :deep([data-scroll-reveal][data-reveal-style='float-up']) {
+      --scroll-reveal-y: 14px;
+      --scroll-reveal-scale: 0.985;
+    }
+
+    :deep([data-scroll-reveal][data-reveal-style='snap-up']) {
+      --scroll-reveal-y: 22px;
+      --scroll-reveal-scale: 0.955;
+      --scroll-reveal-duration: 560ms;
+    }
+
+    :deep([data-scroll-reveal][data-reveal-style='tilt-in']) {
+      --scroll-reveal-x: 12px;
+      --scroll-reveal-y: 10px;
+      --scroll-reveal-scale: 0.97;
+      --scroll-reveal-rotate: -1.8deg;
+    }
+
+    :deep([data-scroll-reveal][data-reveal-style='glide-left']) {
+      --scroll-reveal-x: -18px;
+      --scroll-reveal-y: 0;
+      --scroll-reveal-scale: 0.975;
+    }
+
+    :deep([data-scroll-reveal][data-reveal-style='crisp']) {
+      --scroll-reveal-y: 8px;
+      --scroll-reveal-scale: 0.995;
+      --scroll-reveal-duration: 520ms;
+    }
+
+    :deep([data-scroll-reveal]:not([data-reveal-role='heading'])) {
+      animation: none;
+      opacity: 1;
+      transform: none;
     }
   }
 
   /* ── Scroll-triggered reveal — VueUse/IntersectionObserver fallback path ── */
   @supports not (animation-timeline: view()) {
-    .scroll-reveal-pending {
+    :deep(.scroll-reveal-pending) {
       opacity: 0;
-      translate: 0 52px;
+      transform: translate3d(var(--scroll-reveal-x, 0), var(--scroll-reveal-y, 18px), 0)
+        scale(var(--scroll-reveal-scale, 0.985)) rotate(var(--scroll-reveal-rotate, 0deg));
       transition:
-        opacity 650ms cubic-bezier(0.215, 0.61, 0.355, 1),
-        translate 650ms cubic-bezier(0.215, 0.61, 0.355, 1);
+        opacity var(--scroll-reveal-duration, 620ms) cubic-bezier(0.215, 0.61, 0.355, 1),
+        transform var(--scroll-reveal-duration, 700ms) cubic-bezier(0.215, 0.61, 0.355, 1);
+      transition-delay: var(--scroll-reveal-delay, 0ms);
     }
 
-    .scroll-reveal-done {
+    :deep(.scroll-reveal-pending.scroll-reveal-role-heading) {
+      --scroll-reveal-y: 0;
+      --scroll-reveal-scale: 1;
+      --scroll-reveal-x: 0;
+      --scroll-reveal-rotate: 0deg;
+    }
+
+    :deep(.scroll-reveal-pending.scroll-reveal-role-paragraph) {
+      --scroll-reveal-y: 16px;
+      --scroll-reveal-scale: 0.985;
+    }
+
+    :deep(.scroll-reveal-pending.scroll-reveal-role-image) {
+      --scroll-reveal-x: 18px;
+      --scroll-reveal-y: 0;
+      --scroll-reveal-scale: 0.965;
+    }
+
+    :deep(.scroll-reveal-pending.scroll-reveal-role-generic) {
+      --scroll-reveal-y: 12px;
+      --scroll-reveal-scale: 0.99;
+    }
+
+    :deep(.scroll-reveal-pending[data-reveal-style='lift-soft']:not([data-reveal-role='heading'])) {
+      --scroll-reveal-y: 20px;
+      --scroll-reveal-scale: 0.978;
+    }
+
+    :deep(.scroll-reveal-pending[data-reveal-style='drift-left']) {
+      --scroll-reveal-x: -22px;
+      --scroll-reveal-y: 6px;
+      --scroll-reveal-scale: 0.97;
+    }
+
+    :deep(.scroll-reveal-pending[data-reveal-style='drift-right']) {
+      --scroll-reveal-x: 22px;
+      --scroll-reveal-y: 6px;
+      --scroll-reveal-scale: 0.97;
+    }
+
+    :deep(.scroll-reveal-pending[data-reveal-style='float-up']) {
+      --scroll-reveal-y: 14px;
+      --scroll-reveal-scale: 0.985;
+    }
+
+    :deep(.scroll-reveal-pending[data-reveal-style='snap-up']) {
+      --scroll-reveal-y: 22px;
+      --scroll-reveal-scale: 0.955;
+      --scroll-reveal-duration: 560ms;
+    }
+
+    :deep(.scroll-reveal-pending[data-reveal-style='tilt-in']) {
+      --scroll-reveal-x: 12px;
+      --scroll-reveal-y: 10px;
+      --scroll-reveal-scale: 0.97;
+      --scroll-reveal-rotate: -1.8deg;
+    }
+
+    :deep(.scroll-reveal-pending[data-reveal-style='glide-left']) {
+      --scroll-reveal-x: -18px;
+      --scroll-reveal-y: 0;
+      --scroll-reveal-scale: 0.975;
+    }
+
+    :deep(.scroll-reveal-pending[data-reveal-style='crisp']) {
+      --scroll-reveal-y: 8px;
+      --scroll-reveal-scale: 0.995;
+      --scroll-reveal-duration: 520ms;
+    }
+
+    :deep(.scroll-reveal-done) {
       opacity: 1;
-      translate: 0 0;
+      transform: translate3d(0, 0, 0) scale(1) rotate(0deg);
       transition:
-        opacity 650ms cubic-bezier(0.215, 0.61, 0.355, 1),
-        translate 650ms cubic-bezier(0.215, 0.61, 0.355, 1);
+        opacity var(--scroll-reveal-duration, 620ms) cubic-bezier(0.215, 0.61, 0.355, 1),
+        transform var(--scroll-reveal-duration, 700ms) cubic-bezier(0.215, 0.61, 0.355, 1);
+      transition-delay: var(--scroll-reveal-delay, 0ms);
     }
   }
 

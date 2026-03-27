@@ -3,7 +3,12 @@
 </script>
 
 <template>
-  <div class="preview-shell">
+  <div
+    class="preview-shell"
+    data-scroll-reveal
+    data-reveal-role="image"
+    data-reveal-style="drift-right"
+  >
     <TplVariantModeImageSwap
       image-section="extensions"
       alt="Preview of extensions panel styling for the selected theme variant."
@@ -13,9 +18,9 @@
   </div>
 
   <section>
-    <h2>Extensions</h2>
+    <h2 data-scroll-reveal data-reveal-role="heading" data-reveal-style="lift-soft">Extensions</h2>
 
-    <p>
+    <p data-scroll-reveal data-reveal-role="paragraph" data-reveal-style="lift-soft">
       A glimpse of the extensions panel, where you can see everything remains consistent and user
       friendly, without sacrificing legibility in either dark or light themes.
     </p>

@@ -3,7 +3,12 @@
 </script>
 
 <template>
-  <div class="preview-shell">
+  <div
+    class="preview-shell"
+    data-scroll-reveal
+    data-reveal-role="image"
+    data-reveal-style="drift-left"
+  >
     <TplVariantModeImageSwap
       image-section="versionControl"
       alt="Preview of version control styling for the selected theme variant."
@@ -13,9 +18,11 @@
   </div>
 
   <section>
-    <h2>Version Control</h2>
+    <h2 data-scroll-reveal data-reveal-role="heading" data-reveal-style="lift-soft">
+      Version Control
+    </h2>
 
-    <p>
+    <p data-scroll-reveal data-reveal-role="paragraph" data-reveal-style="lift-soft">
       Carefully selected colors for version control highlights to make sure they convey the right
       meaning in both light and dark modes.
     </p>

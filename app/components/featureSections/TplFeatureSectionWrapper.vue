@@ -10,7 +10,6 @@
 </script>
 <template>
   <section
-    data-scroll-reveal
     p-4
     lg:border-none
     rounded-lg
