@@ -11,6 +11,7 @@
 
   import { useResolvedColorMode } from '@/composables/useResolvedColorMode';
   import { useThemeVariant } from '@/composables/useThemeVariant';
+  import { themePalette } from '@/models/variants';
 
   const { $anime } = useNuxtApp();
   const { resolvedMode, preference } = useResolvedColorMode();
@@ -61,6 +62,31 @@
   });
 
 
+  const activeButtonClass = computed(() => {
+    const mode = resolvedMode.value.toLowerCase();
+    return `bg-${variant.value}-${mode}-ui-widgetHoverBg/40 text-${variant.value}-${mode}-ui-foreground`;
+  });
+
+
+  const backdropEdgeStyle = computed(() => {
+    const mode = resolvedMode.value.toLowerCase() as 'light' | 'dark';
+    const borderColor = themePalette[variant.value][mode].ui.border;
+    if (mode === 'dark') {
+      return {
+        background: `${borderColor}33`,
+        backdropFilter: 'blur(6px) brightness(2)',
+        WebkitBackdropFilter: 'blur(6px) brightness(2)',
+      };
+    } else {
+      return {
+        background: `${borderColor}1a`,
+        backdropFilter: 'blur(6px) brightness(0.96) saturate(2)',
+        WebkitBackdropFilter: 'blur(6px) brightness(0.96) saturate(2)',
+      };
+    }
+  });
+
+
   const modeOptions: Array<{
     value: ColorPreference;
     label: string;
@@ -86,6 +112,13 @@
 
 
   const iconClassMenuOpen = computed(() => {
+    if (preference.value === 'light') return 'i-mynaui:sun-solid';
+    if (preference.value === 'dark') return 'i-mynaui:moon-solid';
+    return 'i-ph:monitor-fill';
+  });
+
+
+  const iconClassModeActive = computed(() => {
     if (preference.value === 'light') return 'i-mynaui:sun-solid';
     if (preference.value === 'dark') return 'i-mynaui:moon-solid';
     return 'i-ph:monitor-fill';
@@ -313,50 +346,49 @@
     </button>
 
     <Teleport to="body">
-      <div
-        v-if="shouldRenderMenu"
-        ref="menuPanel"
-        class="color-mode-menu-panel"
-        border-solid
-        border-1
-        :class="[borderClass, surfaceClass]"
-        rounded-md
-        role="menu"
-        aria-label="Choose color mode"
-        :style="panelStyle"
-      >
-        <button
-          v-for="option in modeOptions"
-          :key="option.value"
-          :ref="setMenuItemRef"
-          type="button"
-          class="color-mode-menu-item"
-          :class="{
-            'color-mode-menu-item-active': preference === option.value,
-            [surfaceClass]: true,
-            [textClass]: true,
-            [hoverButtonClass]: true,
-          }"
-          role="menuitemradio"
-          :aria-checked="preference === option.value"
-          @click="
-            setMode(option.value);
-            trigger();
-          "
+      <div v-if="shouldRenderMenu" class="color-mode-menu-wrapper" :style="panelStyle">
+        <div
+          ref="menuPanel"
+          class="color-mode-menu-panel"
+          border-solid
+          border-1
+          :class="[borderClass, surfaceClass]"
+          rounded-md
+          role="menu"
+          aria-label="Choose color mode"
         >
-          <span class="color-mode-menu-icon" :class="option.iconClass" />
-          <span class="color-mode-menu-copy">
-            <span class="color-mode-menu-title">{{ option.label }}</span>
-            <small class="color-mode-menu-helper">
-              {{ option.value === 'system' ? `Follow system (${osModeLabel})` : option.helper }}
-            </small>
-          </span>
-          <span
-            v-if="preference === option.value"
-            class="color-mode-menu-check i-mynaui:check"
-            aria-hidden="true"
-          />
-        </button>
+          <button
+            v-for="option in modeOptions"
+            :key="option.value"
+            :ref="setMenuItemRef"
+            type="button"
+            class="color-mode-menu-item"
+            :class="{
+              [surfaceClass]: preference !== option.value,
+              [textClass]: true,
+              [hoverButtonClass]: true,
+              [activeButtonClass]: preference === option.value,
+            }"
+            role="menuitemradio"
+            :aria-checked="preference === option.value"
+            @click="
+              setMode(option.value);
+              trigger();
+            "
+          >
+            <span
+              class="color-mode-menu-icon"
+              :class="[option.iconClass, { [iconClassModeActive]: preference === option.value }]"
+            />
+            <span class="color-mode-menu-copy">
+              <span class="color-mode-menu-title">{{ option.label }}</span>
+              <small class="color-mode-menu-helper">
+                {{ option.value === 'system' ? `Follow system (${osModeLabel})` : option.helper }}
+              </small>
+            </span>
+          </button>
+        </div>
+        <div class="color-mode-menu-backdrop-edge" :style="backdropEdgeStyle" />
       </div>
     </Teleport>
   </div>
@@ -371,10 +403,20 @@
     transition: background-color 220ms ease;
   }
 
-  .color-mode-menu-panel {
-    min-width: 13.5rem;
-    padding: 0.35rem;
+  .color-mode-menu-wrapper {
     z-index: 9999;
+  }
+
+  .color-mode-menu-backdrop-edge {
+    position: absolute;
+    inset: -1px;
+    border-radius: calc(0.375rem + 1px);
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  .color-mode-menu-panel {
+    padding: 0.35rem;
     display: flex;
     flex-direction: column;
     gap: 0.2rem;
