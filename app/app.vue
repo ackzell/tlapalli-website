@@ -125,8 +125,22 @@
   const headingRevealState = new WeakMap<HTMLElement, 'hidden' | 'visible'>();
   const headingRevealAnimations = new WeakMap<HTMLElement, { pause: () => void }>();
   const headingRevealStops: Array<() => void> = [];
+  const paragraphRevealState = new WeakMap<HTMLElement, 'hidden' | 'visible'>();
+  const paragraphRevealAnimations = new WeakMap<HTMLElement, { pause: () => void }>();
+  const paragraphRevealStops: Array<() => void> = [];
+  const prefersReducedMotion = import.meta.client
+    ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    : false;
   const enableImageReveals = true;
-  const enableNonHeadingReveals = false;
+  const enableParagraphReveals = false;
+  const enableGenericReveals = false;
+
+
+  function isElementInRevealZone(el: HTMLElement) {
+    const rect = el.getBoundingClientRect();
+    const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+    return rect.top < viewportHeight * 0.92 && rect.bottom > viewportHeight * 0.08;
+  }
 
 
   function getRevealRole(el: HTMLElement): ScrollRevealRole {
@@ -189,7 +203,8 @@
       const { el, role, delayMs } = target;
       if (role === 'heading') continue;
       if (role === 'image' && !enableImageReveals) continue;
-      if (role !== 'image' && !enableNonHeadingReveals) continue;
+      if (role === 'paragraph' && !enableParagraphReveals) continue;
+      if (role === 'generic' && !enableGenericReveals) continue;
 
 
       el.classList.add('scroll-reveal-pending');
@@ -254,6 +269,163 @@
   }
 
 
+  function splitParagraphIntoWords(paragraph: HTMLElement) {
+    if (paragraph.dataset.wordSplitReady === 'true') {
+      return Array.from(paragraph.querySelectorAll<HTMLElement>('.scroll-paragraph-word'));
+    }
+
+
+    const rawText = paragraph.textContent ?? '';
+    if (!rawText.trim()) return [];
+
+
+    paragraph.dataset.wordSplitReady = 'true';
+    paragraph.setAttribute('aria-label', rawText);
+
+
+    const fragment = document.createDocumentFragment();
+    const words = rawText.trim().split(/\s+/);
+    words.forEach((word, index) => {
+      const span = document.createElement('span');
+      span.className = 'scroll-paragraph-word';
+      span.setAttribute('aria-hidden', 'true');
+      span.textContent = word;
+      span.style.opacity = '0';
+      fragment.append(span);
+
+      if (index < words.length - 1) {
+        fragment.append(document.createTextNode(' '));
+      }
+    });
+
+
+    paragraph.textContent = '';
+    paragraph.append(fragment);
+
+
+    return Array.from(paragraph.querySelectorAll<HTMLElement>('.scroll-paragraph-word'));
+  }
+
+
+  function runParagraphWordReveal(paragraph: HTMLElement, direction: 'in' | 'out') {
+    const words = splitParagraphIntoWords(paragraph);
+    if (!words.length) return;
+
+
+    paragraphRevealAnimations.get(paragraph)?.pause();
+
+
+    const isDarkMode = resolvedMode.value.toLowerCase() === 'dark';
+    const hiddenBrightness = isDarkMode ? 0.86 : 1.14;
+    const fromBrightness = direction === 'in' ? hiddenBrightness : 1;
+    const toBrightness = direction === 'in' ? 1 : hiddenBrightness;
+    const fromOpacity = direction === 'in' ? 0 : 1;
+    const toOpacity = direction === 'in' ? 1 : 0;
+    const fromY = direction === 'in' ? 6 : 0;
+    const toY = direction === 'in' ? 0 : 6;
+
+
+    $anime.set(words, {
+      opacity: fromOpacity,
+      translateY: fromY,
+      filter: `brightness(${fromBrightness})`,
+    });
+
+
+    const animation = $anime({
+      targets: words,
+      brightnessLevel: [fromBrightness, toBrightness],
+      opacity: [fromOpacity, toOpacity],
+      translateY: [fromY, toY],
+      duration: direction === 'in' ? 540 : 380,
+      delay:
+        direction === 'in'
+          ? $anime.stagger(22, { start: 40 })
+          : $anime.stagger(12, { from: 'last' }),
+      easing: 'easeOutCubic',
+      update(animation) {
+        for (const item of animation.animatables) {
+          const target = item.target as HTMLElement & { brightnessLevel?: number };
+          const brightness =
+            typeof target.brightnessLevel === 'number' ? target.brightnessLevel : 1;
+          target.style.filter = `brightness(${brightness.toFixed(3)})`;
+        }
+      },
+      complete() {
+        for (const word of words) {
+          const target = word as HTMLElement & { brightnessLevel?: number };
+          if (direction === 'in') {
+            target.style.filter = '';
+          }
+          delete target.brightnessLevel;
+        }
+        paragraphRevealState.set(paragraph, direction === 'in' ? 'visible' : 'hidden');
+      },
+    });
+
+
+    paragraphRevealAnimations.set(paragraph, animation as { pause: () => void });
+  }
+
+
+  function setupParagraphWordReveal() {
+    if (prefersReducedMotion) return;
+
+
+    const paragraphs = Array.from(
+      document.querySelectorAll<HTMLElement>('[data-scroll-reveal][data-reveal-role="paragraph"]'),
+    );
+
+
+    for (const paragraph of paragraphs) {
+      if (paragraph.dataset.wordRevealObserverAttached === 'true') continue;
+      paragraph.dataset.wordRevealObserverAttached = 'true';
+
+
+      const words = splitParagraphIntoWords(paragraph);
+      if (words.length) {
+        const isDarkMode = resolvedMode.value.toLowerCase() === 'dark';
+        const startBrightness = isDarkMode ? 0.86 : 1.14;
+        $anime.set(words, {
+          opacity: 0,
+          translateY: 6,
+          filter: `brightness(${startBrightness})`,
+        });
+        paragraphRevealState.set(paragraph, 'hidden');
+      }
+
+
+      const { stop } = useIntersectionObserver(
+        paragraph,
+        (entries) => {
+          const entry = entries[0];
+          if (!entry) return;
+
+          if (entry.isIntersecting) {
+            if (paragraphRevealState.get(paragraph) !== 'visible') {
+              runParagraphWordReveal(paragraph, 'in');
+            }
+            return;
+          }
+
+          if (paragraphRevealState.get(paragraph) !== 'hidden') {
+            runParagraphWordReveal(paragraph, 'out');
+          }
+        },
+        { threshold: 0.22, rootMargin: '0px 0px -10% 0px' },
+      );
+
+
+      if (isElementInRevealZone(paragraph) && paragraphRevealState.get(paragraph) !== 'visible') {
+        runParagraphWordReveal(paragraph, 'in');
+      }
+
+
+      paragraphRevealStops.push(stop);
+    }
+  }
+
+
   function runHeadingCharacterReveal(heading: HTMLElement, direction: 'in' | 'out') {
     const chars = splitHeadingIntoChars(heading);
     if (!chars.length) return;
@@ -312,6 +484,9 @@
 
 
   function setupHeadingCharacterReveal() {
+    if (prefersReducedMotion) return;
+
+
     const headings = Array.from(
       document.querySelectorAll<HTMLElement>('[data-scroll-reveal][data-reveal-role="heading"]'),
     );
@@ -351,8 +526,13 @@
             runHeadingCharacterReveal(heading, 'out');
           }
         },
-        { threshold: 0.56, rootMargin: '0px 0px -24% 0px' },
+        { threshold: 0.26, rootMargin: '0px 0px -12% 0px' },
       );
+
+
+      if (isElementInRevealZone(heading) && headingRevealState.get(heading) !== 'visible') {
+        runHeadingCharacterReveal(heading, 'in');
+      }
 
 
       headingRevealStops.push(stop);
@@ -365,15 +545,21 @@
 
 
     await nextTick();
+    if (prefersReducedMotion) return;
+
+
     setupHeadingCharacterReveal();
+    setupParagraphWordReveal();
 
 
     if (supportsViewTimeline) return;
 
 
     const targets = collectScrollRevealTargets().filter(({ role }) => {
+      if (role === 'heading') return false;
       if (role === 'image') return enableImageReveals;
-      return enableNonHeadingReveals;
+      if (role === 'paragraph') return enableParagraphReveals;
+      return enableGenericReveals;
     });
     if (targets.length) setupScrollRevealFallback(targets);
   }
@@ -381,13 +567,21 @@
 
   onBeforeUnmount(() => {
     for (const stop of headingRevealStops) stop();
+    for (const stop of paragraphRevealStops) stop();
     const headings = Array.from(
       document.querySelectorAll<HTMLElement>('[data-scroll-reveal][data-reveal-role="heading"]'),
     );
     for (const heading of headings) {
       headingRevealAnimations.get(heading)?.pause();
     }
+    const paragraphs = Array.from(
+      document.querySelectorAll<HTMLElement>('[data-scroll-reveal][data-reveal-role="paragraph"]'),
+    );
+    for (const paragraph of paragraphs) {
+      paragraphRevealAnimations.get(paragraph)?.pause();
+    }
     headingRevealStops.length = 0;
+    paragraphRevealStops.length = 0;
   });
 
 
@@ -577,13 +771,35 @@
 </template>
 
 <style scoped>
-  :deep([data-scroll-reveal][data-reveal-role='heading']:not([data-char-split-ready='true'])) {
-    visibility: hidden;
+  @media (prefers-reduced-motion: no-preference) {
+    :deep([data-scroll-reveal][data-reveal-role='heading']:not([data-char-split-ready='true'])) {
+      visibility: hidden;
+    }
+
+    :deep([data-scroll-reveal][data-reveal-role='paragraph']:not([data-word-split-ready='true'])) {
+      visibility: hidden;
+    }
   }
 
   :deep(.scroll-heading-char) {
     display: inline;
     will-change: opacity, filter;
+  }
+
+  :deep(.scroll-paragraph-word) {
+    display: inline-block;
+    will-change: opacity, transform, filter;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :deep([data-scroll-reveal]) {
+      animation: none !important;
+      transition: none !important;
+      opacity: 1 !important;
+      transform: none !important;
+      filter: none !important;
+      visibility: visible !important;
+    }
   }
 
   /* ── Scroll-triggered reveal — CSS-native path (Chrome 115+, FF 110+, Safari 18+) ── */
