@@ -28,7 +28,7 @@
     mask-image: linear-gradient(to bottom, transparent 25%, black 80%);
   }
 
-  ::v-deep .preview-image {
+  :deep(.preview-image) {
     height: 6rem;
   }
 </style>

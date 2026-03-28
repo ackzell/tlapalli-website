@@ -21,9 +21,9 @@
 </script>
 
 <template>
-  <footer class="pb-150px" flex flex-col lg:flex-row items-center justify-evenly gap-8>
+  <footer class="pb-150px flex flex-col lg:flex-row items-center justify-evenly gap-8">
     <div>
-      <div flex items-center justify-center gap-4>
+      <div class="flex items-center justify-center gap-4">
         <span>VSCode Marketplace</span>
         <a
           href="https://marketplace.visualstudio.com/items?itemName=ackzell.tlapalli"
@@ -33,7 +33,7 @@
           >GET</a
         >
       </div>
-      <p flex flex-wrap items-center justify-center gap-4>
+      <p class="flex flex-wrap items-center justify-center gap-4">
         <a href="https://marketplace.visualstudio.com/items?itemName=ackzell.tlapalli">
           <img
             :src="`https://vsmarketplacebadges.dev/version-short/ackzell.tlapalli.jpg?style=&colorA=${logoColor(variant, 'wbg').replace('#', '')}&colorB=${logoColor(variant, 'fg').replace('#', '')}&label=version`"
@@ -62,7 +62,7 @@
     </div>
 
     <div>
-      <div flex items-center justify-center gap-4>
+      <div class="flex items-center justify-center gap-4">
         <span>Open VSX</span>
         <a
           href="https://open-vsx.org/extension/ackzell/tlapalli"
@@ -72,7 +72,7 @@
           >GET</a
         >
       </div>
-      <p flex flex-wrap items-center justify-center gap-4>
+      <p class="flex flex-wrap items-center justify-center gap-4">
         <a href="https://marketplace.visualstudio.com/items?itemName=ackzell.tlapalli">
           <img
             :src="`https://img.shields.io/open-vsx/v/ackzell/tlapalli?style=&colorA=${logoColor(variant, 'bg').replace('#', '')}&colorB=${logoColor(variant, 'mid').replace('#', '')}&label=version`"
@@ -95,7 +95,7 @@
     </div>
 
     <!-- github icon link -->
-    <div text-sm text-center flex items-center justify-center gap-8 pt-12 md:pt-0>
+    <div class="text-sm text-center flex items-center justify-center gap-8 pt-12 md:pt-0">
       <a href="https://github.com/ackzell/tlapalli" target="_blank" rel="noopener noreferrer">
         <GithubIcon class="inline-block w-7 h-7" />
       </a>

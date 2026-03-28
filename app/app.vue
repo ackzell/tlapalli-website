@@ -1,6 +1,14 @@
 <script setup lang="ts">
   import './styles/base.css';
-  import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+  import {
+    computed,
+    nextTick,
+    onBeforeUnmount,
+    onMounted,
+    ref,
+    watch,
+    type ComponentPublicInstance,
+  } from 'vue';
 
   import TplFeatureSectionWrapper from './components/featureSections/TplFeatureSectionWrapper.vue';
   import { themePalette } from './models/variants';
@@ -122,11 +130,16 @@
   const paragraphRevealState = new WeakMap<HTMLElement, 'hidden' | 'visible'>();
   const paragraphRevealAnimations = new WeakMap<HTMLElement, { pause: () => void }>();
   const paragraphRevealStops: Array<() => void> = [];
+  const sectionRevealStops: Array<() => void> = [];
   const prefersReducedMotion = import.meta.client
     ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
     : false;
+  const canUseTextSplitReveal = import.meta.client;
+  const useSectionRevealFallback = import.meta.client
+    ? !supportsViewTimeline || window.navigator.userAgent.toLowerCase().includes('firefox')
+    : false;
   const enableImageReveals = true;
-  const enableParagraphReveals = false;
+  const enableParagraphReveals = true;
   const enableGenericReveals = false;
 
 
@@ -138,7 +151,44 @@
 
 
   function setupSectionRevealStages() {
-    // Section reveal is CSS scroll-timeline driven for stability.
+    if (prefersReducedMotion || !useSectionRevealFallback) return;
+
+
+    const sections = Array.from(document.querySelectorAll<HTMLElement>('[data-section-reveal]'));
+    for (const section of sections) {
+      if (section.dataset.sectionRevealObserverAttached === 'true') continue;
+      section.dataset.sectionRevealObserverAttached = 'true';
+      section.classList.add('section-reveal-fallback', 'section-reveal-pending');
+
+
+      const revealSection = () => {
+        section.classList.remove('section-reveal-pending');
+        section.classList.add('section-reveal-done');
+      };
+
+
+      const { stop } = useIntersectionObserver(
+        section,
+        (entries) => {
+          const entry = entries[0];
+          if (!entry?.isIntersecting) return;
+          revealSection();
+          stop();
+        },
+        {
+          threshold: 0.38,
+          rootMargin: '0px 0px -18% 0px',
+        },
+      );
+
+
+      if (isElementInRevealZone(section)) {
+        revealSection();
+        stop();
+      } else {
+        sectionRevealStops.push(stop);
+      }
+    }
   }
 
 
@@ -200,10 +250,14 @@
   function setupScrollRevealFallback(targets: ScrollRevealTarget[]) {
     for (const target of targets) {
       const { el, role, delayMs } = target;
-      if (role === 'heading') continue;
       if (role === 'image' && !enableImageReveals) continue;
       if (role === 'paragraph' && !enableParagraphReveals) continue;
       if (role === 'generic' && !enableGenericReveals) continue;
+
+
+      const isTallImage = role === 'image' && el.dataset.revealSize === 'tall';
+      const imageThreshold = isTallImage ? 0.18 : 0.62;
+      const imageRootMargin = isTallImage ? '0px 0px -8% 0px' : '0px 0px -34% 0px';
 
 
       el.classList.add('scroll-reveal-pending');
@@ -216,15 +270,27 @@
         (entries) => {
           const entry = entries[0];
           if (!entry?.isIntersecting) return;
+
+          if (isTallImage && entry.intersectionRatio <= 0 && !isElementInRevealZone(el)) {
+            return;
+          }
+
           el.classList.remove('scroll-reveal-pending');
           el.classList.add('scroll-reveal-done');
           stop();
         },
         {
-          threshold: role === 'image' ? 0.62 : 0.52,
-          rootMargin: role === 'image' ? '0px 0px -34% 0px' : '0px 0px -28% 0px',
+          threshold: role === 'image' ? imageThreshold : 0.52,
+          rootMargin: role === 'image' ? imageRootMargin : '0px 0px -28% 0px',
         },
       );
+
+
+      if (isTallImage && isElementInRevealZone(el)) {
+        el.classList.remove('scroll-reveal-pending');
+        el.classList.add('scroll-reveal-done');
+        stop();
+      }
     }
   }
 
@@ -410,7 +476,7 @@
 
 
   function setupParagraphWordReveal() {
-    if (prefersReducedMotion) return;
+    if (prefersReducedMotion || !canUseTextSplitReveal) return;
 
 
     const paragraphs = Array.from(
@@ -525,7 +591,7 @@
 
 
   function setupHeadingCharacterReveal() {
-    if (prefersReducedMotion) return;
+    if (prefersReducedMotion || !canUseTextSplitReveal) return;
 
 
     const headings = Array.from(
@@ -590,8 +656,10 @@
 
 
     setupSectionRevealStages();
-    setupHeadingCharacterReveal();
-    setupParagraphWordReveal();
+    if (canUseTextSplitReveal) {
+      setupHeadingCharacterReveal();
+      setupParagraphWordReveal();
+    }
 
 
     if (supportsViewTimeline) return;
@@ -608,6 +676,7 @@
 
 
   onBeforeUnmount(() => {
+    for (const stop of sectionRevealStops) stop();
     for (const stop of headingRevealStops) stop();
     for (const stop of paragraphRevealStops) stop();
     const headings = Array.from(
@@ -622,6 +691,7 @@
     for (const paragraph of paragraphs) {
       paragraphRevealAnimations.get(paragraph)?.pause();
     }
+    sectionRevealStops.length = 0;
     headingRevealStops.length = 0;
     paragraphRevealStops.length = 0;
   });
@@ -632,6 +702,12 @@
 
   const showContent = ref(false);
   const startMenuRotation = ref(false);
+  const isAppMounted = ref(false);
+  const headerRef = ref<ComponentPublicInstance | null>(null);
+  const editorPreviewRef = ref<HTMLElement | null>(null);
+  let headerIntroAnimation: { pause: () => void } | null = null;
+  let editorPreviewAnimation: { pause: () => void } | null = null;
+  let stopStartMenuRotationTimer: (() => void) | null = null;
 
 
   async function onGemsRevealed() {
@@ -666,45 +742,78 @@
 
 
   async function onMenuPositioned() {
+    if (!isAppMounted.value) return;
     await nextTick();
 
 
-    $anime({
-      targets: 'header',
+    const headerTarget = headerRef.value?.$el as HTMLElement | null;
+    if (!headerTarget) return;
+
+
+    headerIntroAnimation?.pause();
+    headerIntroAnimation = $anime({
+      targets: headerTarget,
       opacity: [0, 1],
       translateY: [-40, 0],
       duration: 800,
       easing: 'easeInOutCubic',
       async complete() {
+        headerTarget.style.transform = '';
+        if (!isAppMounted.value) return;
         await nextTick();
+        if (!isAppMounted.value) return;
         showContent.value = true;
 
-        $anime({
-          targets: '.editor-preview',
+        const editorPreviewTarget = editorPreviewRef.value;
+        if (!editorPreviewTarget) return;
+
+        editorPreviewAnimation?.pause();
+        editorPreviewAnimation = $anime({
+          targets: editorPreviewTarget,
           opacity: [0, 1],
           translateY: [30, 0],
           duration: 620,
           easing: 'easeOutCubic',
-          complete: setupScrollReveals,
+          complete: () => {
+            if (!isAppMounted.value) return;
+            void setupScrollReveals();
+          },
         });
 
-        useTimeoutFn(() => {
+        stopStartMenuRotationTimer?.();
+        const timer = useTimeoutFn(() => {
+          if (!isAppMounted.value) return;
           startMenuRotation.value = true;
         }, 200);
+        stopStartMenuRotationTimer = timer.stop;
       },
     });
   }
+
+
+  onMounted(() => {
+    isAppMounted.value = true;
+  });
+
+
+  onBeforeUnmount(() => {
+    isAppMounted.value = false;
+    headerIntroAnimation?.pause();
+    editorPreviewAnimation?.pause();
+    stopStartMenuRotationTimer?.();
+    stopStartMenuRotationTimer = null;
+  });
 </script>
 
 <template>
-  <ColorScheme>
+  <ColorScheme tag="div" placeholder-tag="div">
     <div
       :class="[surfaceClass, selectionClass]"
       :style="{ transition: 'background-color 260ms ease, color 260ms ease' }"
     >
-      <TplHeader opacity-0 />
+      <TplHeader ref="headerRef" class="opacity-0" />
 
-      <div id="page" m-0 p-0 flex="~ col gap-2" relative>
+      <div id="page" class="relative flex flex-col gap-2 p-0 m-0">
         <TplMenu
           :start-menu-rotation="startMenuRotation"
           @gems-revealed="onGemsRevealed"
@@ -726,23 +835,22 @@
         </section>
 
         <div
-          flex
-          flex-col
-          items-center
-          justify-center
-          px-12
-          gap-12
+          class="flex flex-col items-center justify-center gap-12 px-12"
           :style="{ opacity: showContent ? 1 : 0 }"
         >
-          <section px-8 pb-2 flex flex-col gap-12 w="full sm:60vw md:70vw" lg:justify-evenly>
-            <h2 transition-opacity transition-discrete text-center p-0 pt-6 md:my-0 class="my-25%">
+          <section
+            class="flex flex-col w-full gap-12 px-8 pb-2 sm:w-60vw md:w-70vw lg:justify-evenly"
+          >
+            <h2 class="transition-opacity transition-discrete text-center p-0 pt-6 my-25% md:my-0">
               Tlapalli means "color" in Náhuatl
             </h2>
-            <TplEditorPreview />
+            <div ref="editorPreviewRef">
+              <TplEditorPreview />
+            </div>
           </section>
 
-          <main pb-36 flex="~ col" gap-12>
-            <section p-4 rounded-lg lg:border-none class="md:px-10%" data-section-reveal>
+          <main class="flex flex-col gap-12 pb-36">
+            <section class="p-4 rounded-lg md:px-10% lg:border-none" data-section-reveal>
               <h2 data-scroll-reveal data-reveal-role="heading" data-reveal-style="lift-soft">
                 A monochromatic, distraction free theme
               </h2>
@@ -768,30 +876,16 @@
               <TplVersionControl />
             </TplFeatureSectionWrapper>
 
-            <div flex flex-col gap-12 lg:gap-8 lg:flex-row justify-center items-center>
+            <div class="flex flex-col items-center justify-center gap-12 lg:gap-8 lg:flex-row">
               <section
-                p-4
-                rounded-lg
-                lg:border-none
+                class="flex flex-wrap items-center justify-center gap-8 p-4 rounded-lg lg:border-none"
                 data-section-reveal
-                flex
-                items-center
-                justify-center
-                gap-8
-                flex-wrap
               >
                 <TplAiChat />
               </section>
               <section
-                p-4
-                rounded-lg
-                lg:border-none
+                class="flex flex-wrap items-center justify-center gap-8 p-4 rounded-lg lg:border-none"
                 data-section-reveal
-                flex
-                items-center
-                justify-center
-                gap-8
-                flex-wrap
               >
                 <TplExtensions />
               </section>
@@ -807,7 +901,7 @@
           </main>
         </div>
       </div>
-      <TplFooter data-scroll-reveal data-reveal-role="generic" data-reveal-style="crisp" />
+      <TplFooter />
     </div>
   </ColorScheme>
 </template>
@@ -862,11 +956,15 @@
 
   @supports (animation-timeline: view()) {
     @media (max-width: 1023px) and (prefers-reduced-motion: no-preference) {
-      :deep([data-section-reveal]::before) {
+      :deep([data-section-reveal]:not(.section-reveal-fallback)::before) {
         animation: section-reveal-clip linear both;
         animation-timeline: view();
         animation-range: entry 50% cover 70%;
         will-change: clip-path;
+      }
+
+      :deep([data-section-reveal].section-reveal-fallback::before) {
+        animation: none;
       }
     }
   }
@@ -876,6 +974,17 @@
       :deep([data-section-reveal]::before) {
         clip-path: polygon(0 0, 100% 0, 100% 2px, 2px 2px, 2px 100%, 0 100%);
       }
+    }
+  }
+
+  @media (max-width: 1023px) and (prefers-reduced-motion: no-preference) {
+    :deep([data-section-reveal].section-reveal-fallback.section-reveal-pending::before) {
+      clip-path: polygon(0 0, 0 0, 0 0, 0 0, 0 0, 0 0);
+    }
+
+    :deep([data-section-reveal].section-reveal-fallback.section-reveal-done::before) {
+      animation: section-reveal-clip 780ms cubic-bezier(0.215, 0.61, 0.355, 1) both;
+      will-change: clip-path;
     }
   }
 
@@ -916,9 +1025,6 @@
       --scroll-reveal-scale: 1;
       --scroll-reveal-x: 0;
       --scroll-reveal-rotate: 0deg;
-      animation: none;
-      opacity: 1;
-      transform: none;
       animation-range: entry 82% contain 72%;
     }
 
@@ -1010,12 +1116,6 @@
       --scroll-reveal-y: 8px;
       --scroll-reveal-scale: 0.995;
       --scroll-reveal-duration: 520ms;
-    }
-
-    :deep([data-scroll-reveal]:not([data-reveal-role='heading']):not([data-reveal-role='image'])) {
-      animation: none;
-      opacity: 1;
-      transform: none;
     }
   }
 

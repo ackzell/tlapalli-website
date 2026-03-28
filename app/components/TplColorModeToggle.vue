@@ -324,16 +324,7 @@
   <div ref="menuRoot" class="color-mode-menu-root">
     <button
       ref="triggerButton"
-      bg-transparent
-      border-none
-      cursor-pointer
-      p-2
-      relative
-      z-20
-      touch-manipulation
-      hover:scale-110
-      active:scale-95
-      transition-transform
+      class="bg-transparent border-none cursor-pointer p-2 relative z-20 touch-manipulation hover:scale-110 active:scale-95 transition-transform"
       :class="textClass"
       :aria-label="buttonLabel"
       :title="buttonLabel"
@@ -344,18 +335,15 @@
         trigger();
       "
     >
-      <div text-xl :class="[iconClass, textClass, isMenuOpen ? iconClassMenuOpen : '']" />
+      <div class="text-xl" :class="[iconClass, textClass, isMenuOpen ? iconClassMenuOpen : '']" />
     </button>
 
     <Teleport to="body">
       <div v-if="shouldRenderMenu" class="color-mode-menu-wrapper" :style="panelStyle">
         <div
           ref="menuPanel"
-          class="color-mode-menu-panel"
-          border-solid
-          border-1
+          class="color-mode-menu-panel border-solid border-1 rounded-md"
           :class="[borderClass, surfaceClass]"
-          rounded-md
           role="menu"
           aria-label="Choose color mode"
         >

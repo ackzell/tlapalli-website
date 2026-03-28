@@ -6,7 +6,7 @@
 </script>
 
 <template>
-  <div id="current-gem" flex="~" items-center>
+  <div id="current-gem" class="flex items-center">
     <svg viewBox="110 110 128 128" version="1.1" xmlns="http://www.w3.org/2000/svg" class="w-16">
       <g id="layer1" transform="translate(224.52412,-46.047909)">
         <g id="g45170" transform="translate(22.19,288.814)">

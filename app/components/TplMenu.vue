@@ -432,10 +432,7 @@
       "
     >
       <div
-        i-mynaui:fat-corner-left-down
-        hover:i-mynaui:fat-corner-left-down-solid
-        hover:scale-150
-        active:scale-98
+        class="i-mynaui:fat-corner-left-down hover:i-mynaui:fat-corner-left-down-solid hover:scale-150 active:scale-98"
         transition="transform 220ms ease"
       />
     </button>
@@ -462,10 +459,7 @@
       "
     >
       <div
-        i-mynaui:fat-corner-right-down
-        hover:i-mynaui:fat-corner-right-down-solid
-        hover:scale-150
-        active:scale-98
+        class="i-mynaui:fat-corner-right-down hover:i-mynaui:fat-corner-right-down-solid hover:scale-150 active:scale-98"
         transition="transform 220ms ease"
       />
     </button>

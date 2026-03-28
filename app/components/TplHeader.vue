@@ -19,43 +19,32 @@
 
 <template>
   <header
-    px-4
-    py-8
-    sticky
-    top-0
-    z-10
+    class="sticky top-0 z-10 px-4 py-8"
     :class="$colorMode.value !== 'dark' ? 'scroll-shadow-header' : ''"
   >
     <div class="backdrop">
-      <div relative m-0 p-2 flex="~" items-center justify-between>
-        <h1 font-serif>Tlapalli <small font-sans opacity-80 text-sm>VSCode Theme</small></h1>
+      <div class="relative flex items-center justify-between p-2 m-0">
+        <h1 class="font-serif">
+          Tlapalli <small class="font-sans text-sm opacity-80">VSCode Theme</small>
+        </h1>
 
         <div
-          md:absolute
-          w-max
-          pointer-events-none
-          class="md:-translate-x-1/2 md:-translate-y-1/2 md:left-1/2 md:top-1/2"
+          class="pointer-events-none md:absolute md:-translate-x-1/2 md:-translate-y-1/2 md:left-1/2 md:top-1/2 w-max"
         >
-          <div relative flex="~" items-center justify-center>
+          <div class="relative flex items-center justify-center">
             <span
-              font-mono
-              absolute
-              right-40px
-              opacity-0
-              md:opacity-100
-              transition-opacity
-              duration-250
+              class="absolute font-mono transition-opacity opacity-0 right-40px md:opacity-100 duration-250"
             >
               selected:
             </span>
-            <div hidden absolute md:inline>
+            <div hidden absolute class="md:inline">
               <TplCurrentVariantGem />
             </div>
-            <TplCurrentVariantName font-mono absolute -left-50px class="md:left-40px" />
+            <TplCurrentVariantName class="absolute font-mono -left-50px md:left-40px" />
           </div>
         </div>
 
-        <TplColorModeToggle pointer-events-initial />
+        <TplColorModeToggle class="pointer-events-initial" />
       </div>
     </div>
     <div class="backdrop-edge" :class="`${$colorMode.value}-backdrop-edge`" />
