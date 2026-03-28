@@ -283,24 +283,66 @@
     paragraph.setAttribute('aria-label', rawText);
 
 
+    const sourceNodes = Array.from(paragraph.childNodes);
     const fragment = document.createDocumentFragment();
-    const words = rawText.trim().split(/\s+/);
-    words.forEach((word, index) => {
-      const span = document.createElement('span');
-      span.className = 'scroll-paragraph-word';
-      span.setAttribute('aria-hidden', 'true');
-      span.textContent = word;
-      span.style.opacity = '0';
-      fragment.append(span);
 
-      if (index < words.length - 1) {
-        fragment.append(document.createTextNode(' '));
+
+    const splitTextNodeIntoWords = (text: string) => {
+      const tokens = text.split(/(\s+)/);
+      const output = document.createDocumentFragment();
+
+
+      for (const token of tokens) {
+        if (!token) continue;
+        if (/^\s+$/.test(token)) {
+          output.append(document.createTextNode(token));
+          continue;
+        }
+
+
+        const span = document.createElement('span');
+        span.className = 'scroll-paragraph-word';
+        span.setAttribute('aria-hidden', 'true');
+        span.textContent = token;
+        span.style.opacity = '0';
+        output.append(span);
       }
-    });
 
 
-    paragraph.textContent = '';
-    paragraph.append(fragment);
+      return output;
+    };
+
+
+    const transformNode = (node: Node): Node => {
+      if (node.nodeType === Node.TEXT_NODE) {
+        return splitTextNodeIntoWords(node.textContent ?? '');
+      }
+
+
+      if (node.nodeType === Node.ELEMENT_NODE) {
+        const element = node as HTMLElement;
+        const clone = element.cloneNode(false) as HTMLElement;
+
+
+        for (const child of Array.from(element.childNodes)) {
+          clone.append(transformNode(child));
+        }
+
+
+        return clone;
+      }
+
+
+      return node.cloneNode(true);
+    };
+
+
+    for (const node of sourceNodes) {
+      fragment.append(transformNode(node));
+    }
+
+
+    paragraph.replaceChildren(fragment);
 
 
     return Array.from(paragraph.querySelectorAll<HTMLElement>('.scroll-paragraph-word'));
