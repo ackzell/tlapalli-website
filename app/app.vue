@@ -65,15 +65,9 @@
   });
 
 
-  const borderClass = computed(() => {
-    const mode = resolvedMode.value.toLowerCase();
-    return [
-      `lg:border-none`,
-      `border-${variant.value}-${mode}-ui-border`,
-      `border-1`,
-      `border-solid`,
-      `border-r-transparent border-b-transparent`,
-    ].join(' ');
+  const currentBorderColor = computed(() => {
+    const mode = resolvedMode.value.toLowerCase() as 'dark' | 'light';
+    return themePalette[variant.value][mode].ui.border;
   });
 
 
@@ -140,6 +134,11 @@
     const rect = el.getBoundingClientRect();
     const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
     return rect.top < viewportHeight * 0.92 && rect.bottom > viewportHeight * 0.08;
+  }
+
+
+  function setupSectionRevealStages() {
+    // Section reveal is CSS scroll-timeline driven for stability.
   }
 
 
@@ -590,6 +589,7 @@
     if (prefersReducedMotion) return;
 
 
+    setupSectionRevealStages();
     setupHeadingCharacterReveal();
     setupParagraphWordReveal();
 
@@ -742,7 +742,7 @@
           </section>
 
           <main pb-36 flex="~ col" gap-12>
-            <section p-4 rounded-lg :class="borderClass" class="md:px-10%">
+            <section p-4 rounded-lg lg:border-none class="md:px-10%" data-section-reveal>
               <h2 data-scroll-reveal data-reveal-role="heading" data-reveal-style="lift-soft">
                 A monochromatic, distraction free theme
               </h2>
@@ -772,7 +772,8 @@
               <section
                 p-4
                 rounded-lg
-                :class="borderClass"
+                lg:border-none
+                data-section-reveal
                 flex
                 items-center
                 justify-center
@@ -784,7 +785,8 @@
               <section
                 p-4
                 rounded-lg
-                :class="borderClass"
+                lg:border-none
+                data-section-reveal
                 flex
                 items-center
                 justify-center
@@ -805,9 +807,7 @@
           </main>
         </div>
       </div>
-      <footer data-scroll-reveal data-reveal-role="generic" data-reveal-style="crisp">
-        footer here
-      </footer>
+      <TplFooter data-scroll-reveal data-reveal-role="generic" data-reveal-style="crisp" />
     </div>
   </ColorScheme>
 </template>
@@ -841,6 +841,53 @@
       transform: none !important;
       filter: none !important;
       visibility: visible !important;
+    }
+  }
+
+  @media (max-width: 1023px) and (prefers-reduced-motion: no-preference) {
+    :deep([data-section-reveal]) {
+      position: relative;
+    }
+
+    :deep([data-section-reveal]::before) {
+      content: '';
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      clip-path: polygon(0 0, 0 0, 0 0, 0 0, 0 0, 0 0);
+      border: 1px solid v-bind(currentBorderColor);
+      border-radius: inherit;
+    }
+  }
+
+  @supports (animation-timeline: view()) {
+    @media (max-width: 1023px) and (prefers-reduced-motion: no-preference) {
+      :deep([data-section-reveal]::before) {
+        animation: section-reveal-clip linear both;
+        animation-timeline: view();
+        animation-range: entry 50% cover 70%;
+        will-change: clip-path;
+      }
+    }
+  }
+
+  @supports not (animation-timeline: view()) {
+    @media (max-width: 1023px) and (prefers-reduced-motion: no-preference) {
+      :deep([data-section-reveal]::before) {
+        clip-path: polygon(0 0, 100% 0, 100% 2px, 2px 2px, 2px 100%, 0 100%);
+      }
+    }
+  }
+
+  @keyframes section-reveal-clip {
+    0% {
+      clip-path: polygon(0 0, 0 0, 0 0, 0 0, 0 0, 0 0);
+    }
+    52% {
+      clip-path: polygon(0 0, 100% 0, 100% 2px, 2px 2px, 2px 100%, 0 100%);
+    }
+    100% {
+      clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 0 100%, 0 0);
     }
   }
 
