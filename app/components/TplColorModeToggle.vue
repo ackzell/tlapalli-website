@@ -40,13 +40,17 @@
 
 
   const { variant } = useThemeVariant({ defaultVariant: 'obsidian' });
+
+
   const borderClass = computed(() => {
     const mode = resolvedMode.value.toLowerCase();
     return `border-${variant.value}-${mode}-ui-border`;
   });
+
+
   const surfaceClass = computed(() => {
     const mode = resolvedMode.value.toLowerCase();
-    return `bg-${variant.value}-${mode}-ui-widgetBg/60`;
+    return `bg-${variant.value}-${mode}-ui-widgetBg/40`;
   });
 
 
@@ -74,8 +78,8 @@
     if (mode === 'dark') {
       return {
         background: `${borderColor}33`,
-        backdropFilter: 'blur(6px) brightness(2)',
-        WebkitBackdropFilter: 'blur(6px) brightness(2)',
+        backdropFilter: 'blur(6px) brightness(3)',
+        WebkitBackdropFilter: 'blur(6px) brightness(3)',
       };
     } else {
       return {
@@ -293,19 +297,17 @@
   }
 
 
-  // Reposition on scroll or resize while open
-  function handleScrollResize() {
+  // Reposition only on resize while open
+  function handleResize() {
     if (isMenuOpen.value) positionPanel();
   }
 
 
-  window.addEventListener('scroll', handleScrollResize, { passive: true, capture: true });
-  window.addEventListener('resize', handleScrollResize, { passive: true });
+  window.addEventListener('resize', handleResize, { passive: true });
 
 
   onBeforeUnmount(() => {
-    window.removeEventListener('scroll', handleScrollResize, { capture: true });
-    window.removeEventListener('resize', handleScrollResize);
+    window.removeEventListener('resize', handleResize);
   });
 
 
@@ -409,7 +411,7 @@
 
   .color-mode-menu-backdrop-edge {
     position: absolute;
-    inset: -1px;
+    inset: -2px;
     border-radius: calc(0.375rem + 1px);
     pointer-events: none;
     z-index: -1;

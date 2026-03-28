@@ -67,7 +67,13 @@
 
   const borderClass = computed(() => {
     const mode = resolvedMode.value.toLowerCase();
-    return `border-${variant.value}-${mode}-ui-border`;
+    return [
+      `lg:border-none`,
+      `border-${variant.value}-${mode}-ui-border`,
+      `border-1`,
+      `border-solid`,
+      `border-r-transparent border-b-transparent`,
+    ].join(' ');
   });
 
 
@@ -500,14 +506,7 @@
           </section>
 
           <main pb-36 flex="~ col" gap-12>
-            <section
-              p-4
-              lg:border-none
-              rounded-lg
-              border-solid
-              :class="borderClass"
-              class="md:px-10%"
-            >
+            <section p-4 rounded-lg :class="borderClass" class="md:px-10%">
               <h2 data-scroll-reveal data-reveal-role="heading" data-reveal-style="lift-soft">
                 A monochromatic, distraction free theme
               </h2>
@@ -536,9 +535,7 @@
             <div flex flex-col gap-12 lg:gap-8 lg:flex-row justify-center items-center>
               <section
                 p-4
-                lg:border-none
                 rounded-lg
-                border-solid
                 :class="borderClass"
                 flex
                 items-center
@@ -550,9 +547,7 @@
               </section>
               <section
                 p-4
-                lg:border-none
                 rounded-lg
-                border-solid
                 :class="borderClass"
                 flex
                 items-center

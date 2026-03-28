@@ -5,15 +5,19 @@
 
   const borderClass = computed(() => {
     const mode = resolvedMode.value.toLowerCase();
-    return `border-${variant.value}-${mode}-ui-border`;
+    return [
+      `lg:border-none`,
+      `border-${variant.value}-${mode}-ui-border`,
+      `border-1`,
+      `border-solid`,
+      `border-r-transparent border-b-transparent`,
+    ].join(' ');
   });
 </script>
 <template>
   <section
     p-4
-    lg:border-none
     rounded-lg
-    border-solid
     :class="borderClass"
     flex
     flex-col
@@ -22,6 +26,7 @@
     justify-evenly
     gap-8
     flex-wrap
+    class=""
   >
     <slot />
   </section>
