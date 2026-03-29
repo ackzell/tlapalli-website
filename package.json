@@ -8,6 +8,7 @@
     "dev:network": "nuxt dev --host 0.0.0.0 --port 3000",
     "dev:mobile": "NUXT_DEVTOOLS=false nuxt dev --host 0.0.0.0 --port 3000",
     "generate": "nuxt generate",
+    "deploy": "nuxt generate && npx wrangler pages deploy dist/",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
     "lint": "eslint .",

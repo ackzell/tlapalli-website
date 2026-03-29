@@ -81,6 +81,10 @@ export default defineNuxtConfig({
     '@vueuse/nuxt',
   ],
 
+  image: {
+    provider: 'static',
+  },
+
   vite: {
     optimizeDeps: {
       include: ['web-haptics/vue'],
