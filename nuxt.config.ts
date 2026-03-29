@@ -4,8 +4,7 @@ export default defineNuxtConfig({
   devtools: { enabled: process.env.NUXT_DEVTOOLS !== 'false' },
 
   site: {
-    // Set NUXT_SITE_URL in production (for example: https://your-domain.com).
-    url: process.env.NUXT_SITE_URL || 'http://localhost:3000',
+    url: process.env.NUXT_SITE_URL || 'https://tlapalli.ackzell.dev',
     name: 'Tlapalli - VSCode Theme',
     description:
       'Tlapalli means color in Náhuatl. Monochromatic theme with colored variations. Inspired by minerals found in Mexico',
