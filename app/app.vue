@@ -901,7 +901,12 @@
           </main>
         </div>
       </div>
-      <TplFooter />
+      <TplFooter
+        class="scroll-reveal"
+        data-scroll-reveal
+        data-reveal-role="footer"
+        data-reveal-style="lift-soft"
+      />
     </div>
   </ColorScheme>
 </template>
@@ -1063,6 +1068,12 @@
 
     :deep([data-scroll-reveal][data-reveal-role='image'][data-reveal-size='tall']) {
       animation-range: entry 40% cover 35%;
+    }
+
+    :deep([data-scroll-reveal][data-reveal-role='footer']) {
+      --scroll-reveal-y: 16px;
+      --scroll-reveal-scale: 0.985;
+      animation-range: entry 16% contain 20%;
     }
 
     :deep([data-scroll-reveal][data-reveal-role='generic']) {

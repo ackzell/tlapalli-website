@@ -21,7 +21,7 @@
 </script>
 
 <template>
-  <footer class="pb-150px flex flex-col lg:flex-row items-center justify-evenly gap-8">
+  <footer class="flex flex-col items-center gap-8 pb-150px lg:flex-row justify-evenly">
     <div>
       <div class="flex items-center justify-center gap-4">
         <span>VSCode Marketplace</span>
@@ -95,7 +95,7 @@
     </div>
 
     <!-- github icon link -->
-    <div class="text-sm text-center flex items-center justify-center gap-8 pt-12 md:pt-0">
+    <div class="flex items-center justify-center gap-8 px-6 pt-12 text-sm text-center md:pt-0">
       <a href="https://github.com/ackzell/tlapalli" target="_blank" rel="noopener noreferrer">
         <GithubIcon class="inline-block w-7 h-7" />
       </a>
