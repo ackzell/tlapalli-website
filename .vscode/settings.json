@@ -3,9 +3,9 @@
   "editor.defaultFormatter": "oxc.oxc-vscode",
   "editor.formatOnSave": true,
   "editor.codeActionsOnSave": {
-    "source.fixAll.oxc": "always",
+    "source.fixAll.oxc": "always"
   },
   "[vue]": {
-    "editor.defaultFormatter": "oxc.oxc-vscode",
-  },
+    "editor.defaultFormatter": "oxc.oxc-vscode"
+  }
 }
