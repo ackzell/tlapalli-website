@@ -22,6 +22,29 @@
   import { useResolvedColorMode } from '@/composables/useResolvedColorMode';
   import { useThemeVariant } from '@/composables/useThemeVariant';
 
+  const seoTitle = 'Tlapalli - VSCode Theme';
+  const seoDescription =
+    'Tlapalli means color in Náhuatl. Monochromatic theme with colored variations. Inspired by minerals found in Mexico';
+
+
+  useSeoMeta({
+    title: seoTitle,
+    description: seoDescription,
+    ogType: 'website',
+    ogSiteName: seoTitle,
+    ogTitle: seoTitle,
+    ogDescription: seoDescription,
+    ogImage: '/images/variants/obsidianDark.png',
+    ogImageAlt: 'Tlapalli Obsidian theme preview in VS Code',
+    ogImageWidth: 1200,
+    ogImageHeight: 630,
+    twitterCard: 'summary_large_image',
+    twitterTitle: seoTitle,
+    twitterDescription: seoDescription,
+    twitterImage: '/images/variants/obsidianDark.png',
+  });
+
+
   const { variant } = useThemeVariant({ defaultVariant: 'obsidian' });
   const { $anime } = useNuxtApp();
   const {
