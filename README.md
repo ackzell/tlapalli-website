@@ -2,6 +2,9 @@
 
 This is a Nuxt 4 website that serves as the landing page for the VSCode theme.
 
+<img width="1728" height="1085" alt="Screenshot 2026-03-30 at 1 07 11 p m" src="https://github.com/user-attachments/assets/aa649fa5-06c8-468b-89f6-942e393ad10e" />
+
+
 ## Running locally
 
 After installing the dependencies (`pnpm install`)
