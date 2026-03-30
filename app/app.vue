@@ -836,7 +836,19 @@
             class="flex flex-col w-full gap-12 px-8 pb-2 sm:w-60vw md:w-70vw lg:justify-evenly"
           >
             <h2 class="transition-opacity transition-discrete text-center p-0 pt-6 my-25% md:my-0">
-              tlah-PAH-lee means "color" in Náhuatl
+              <a
+                href="https://nahuatl.wired-humanities.org/content/tlapalli"
+                target="_blank"
+                rel="noopener noreferrer"
+                >tlah-PAH-lee</a
+              >
+              means "color" in
+              <a
+                href="https://en.wikipedia.org/wiki/Nahuatl"
+                target="_blank"
+                rel="noopener noreferrer"
+                >N&aacute;huatl</a
+              >
             </h2>
             <div ref="editorPreviewRef">
               <TplEditorPreview />
