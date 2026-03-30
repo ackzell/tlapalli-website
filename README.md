@@ -1,75 +1,27 @@
-# Nuxt Minimal Starter
+# Tlapalli website
 
-Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+This is a Nuxt 4 website that serves as the landing page for the VSCode theme.
 
-## Setup
+## Running locally
 
-Make sure to install dependencies:
-
-```bash
-# npm
-npm install
-
-# pnpm
-pnpm install
-
-# yarn
-yarn install
-
-# bun
-bun install
-```
-
-## Development Server
-
-Start the development server on `http://localhost:3000`:
+After installing the dependencies (`pnpm install`)
 
 ```bash
-# npm
 npm run dev
-
-# pnpm
-pnpm dev
-
-# yarn
-yarn dev
-
-# bun
-bun run dev
 ```
 
-## Production
-
-Build the application for production:
+To be able to see the changes on a mobile device while developing, run:
 
 ```bash
-# npm
-npm run build
-
-# pnpm
-pnpm build
-
-# yarn
-yarn build
-
-# bun
-bun run build
+npm run dev:network
 ```
 
-Locally preview production build:
+## Deployment
+
+Currently being deployed to cloudflare, the only way I was able to make it work was via `wrangler`. The following command is all that should be required:
 
 ```bash
-# npm
-npm run preview
-
-# pnpm
-pnpm preview
-
-# yarn
-yarn preview
-
-# bun
-bun run preview
+npm run deploy
 ```
 
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+I started modifying the `version` field in the [`package.json`](package.json) file just to make sure I would get the newest files deployed.
