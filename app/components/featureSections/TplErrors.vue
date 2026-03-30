@@ -6,8 +6,9 @@
   <section>
     <h2 data-scroll-reveal data-reveal-role="heading" data-reveal-style="snap-up">Tamed Errors</h2>
     <p data-scroll-reveal data-reveal-role="paragraph" data-reveal-style="snap-up">
-      Errors will still be visible, but the <em>squigly underlines</em> follow the same hue as the
-      text for this theme*.
+      Errors will still be visible, but the
+      <em class="decoration-underline decoration-wavy">squigly underlines</em> follow the same hue
+      as the text for this theme*.
     </p>
     <p data-scroll-reveal data-reveal-role="paragraph" data-reveal-style="snap-up">
       If you pair the theme with the excellent
@@ -44,11 +45,6 @@
 </template>
 
 <style scoped>
-  em {
-    text-decoration-line: underline;
-    text-decoration-style: wavy;
-  }
-
   .errors-preview-shell {
     -webkit-mask-image:
       linear-gradient(to top, transparent 5%, black 60%),

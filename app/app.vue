@@ -1,5 +1,4 @@
 <script setup lang="ts">
-  import './styles/base.css';
   import {
     computed,
     nextTick,
@@ -10,6 +9,8 @@
     type ComponentPublicInstance,
   } from 'vue';
 
+  import './styles/base.css';
+  import pkg from '../package.json';
   import TplFeatureSectionWrapper from './components/featureSections/TplFeatureSectionWrapper.vue';
   import { themePalette } from './models/variants';
   import TplAiChat from '@/components/featureSections/TplAiChat.vue';
@@ -21,28 +22,15 @@
   import TplVariantModeImageSwap from '@/components/shared/TplVariantModeImageSwap.vue';
   import { useResolvedColorMode } from '@/composables/useResolvedColorMode';
   import { useThemeVariant } from '@/composables/useThemeVariant';
+  if (import.meta.client) {
+    console.log('[DEPLOY INFO]', {
+      node: typeof process !== 'undefined' ? process.version : 'browser',
+      version: pkg.version,
+    });
+  }
 
-  const seoTitle = 'Tlapalli - VSCode Theme';
-  const seoDescription =
-    'Tlapalli means color in Náhuatl. Monochromatic theme with colored variations. Inspired by minerals found in Mexico';
 
-
-  useSeoMeta({
-    title: seoTitle,
-    description: seoDescription,
-    ogType: 'website',
-    ogSiteName: seoTitle,
-    ogTitle: seoTitle,
-    ogDescription: seoDescription,
-    ogImage: '/images/variants/obsidianDark.png',
-    ogImageAlt: 'Tlapalli Obsidian theme preview in VS Code',
-    ogImageWidth: 1200,
-    ogImageHeight: 630,
-    twitterCard: 'summary_large_image',
-    twitterTitle: seoTitle,
-    twitterDescription: seoDescription,
-    twitterImage: '/images/variants/obsidianDark.png',
-  });
+  // ...existing code...
 
 
   const { variant } = useThemeVariant({ defaultVariant: 'obsidian' });
@@ -375,52 +363,42 @@
     const fragment = document.createDocumentFragment();
 
 
-    const splitTextNodeIntoWords = (text: string) => {
+    // Helper to split text into word spans, optionally inheriting classes from parent
+    const splitTextNodeIntoWords = (text: string, inheritedClasses: string[] = []) => {
       const tokens = text.split(/(\s+)/);
       const output = document.createDocumentFragment();
-
-
       for (const token of tokens) {
         if (!token) continue;
         if (/^\s+$/.test(token)) {
           output.append(document.createTextNode(token));
           continue;
         }
-
-
         const span = document.createElement('span');
-        span.className = 'scroll-paragraph-word';
+        span.className = ['scroll-paragraph-word', ...inheritedClasses].join(' ');
         span.setAttribute('aria-hidden', 'true');
         span.textContent = token;
         span.style.opacity = '0';
         output.append(span);
       }
-
-
       return output;
     };
 
 
-    const transformNode = (node: Node): Node => {
+    // Recursively transform nodes, passing down classes from element nodes
+    const transformNode = (node: Node, inheritedClasses: string[] = []) => {
       if (node.nodeType === Node.TEXT_NODE) {
-        return splitTextNodeIntoWords(node.textContent ?? '');
+        return splitTextNodeIntoWords(node.textContent ?? '', inheritedClasses);
       }
-
-
       if (node.nodeType === Node.ELEMENT_NODE) {
         const element = node as HTMLElement;
+        // Merge parent classes with this element's classes
+        const mergedClasses = [...inheritedClasses, ...Array.from(element.classList)];
         const clone = element.cloneNode(false) as HTMLElement;
-
-
         for (const child of Array.from(element.childNodes)) {
-          clone.append(transformNode(child));
+          clone.append(transformNode(child, mergedClasses));
         }
-
-
         return clone;
       }
-
-
       return node.cloneNode(true);
     };
 
@@ -748,19 +726,12 @@
 
 
   async function onLogoIntroFinished() {
-    // if (hasRunInitialReveal.value) return;
-    // hasRunInitialReveal.value = true;
-    // await nextTick();
-    // if (!editorPreviewSectionRef.value) return;
-    // $anime.set(editorPreviewSectionRef.value, { opacity: 0, translateY: 30 });
-    // $anime({
-    //   targets: editorPreviewSectionRef.value,
-    //   opacity: [0, 1],
-    //   translateY: [30, 0],
-    //   duration: 620,
-    //   easing: 'easeOutCubic',
-    //   complete: setupScrollReveals,
-    // });
+    // set current variant to obsidian
+    if (variant.value !== 'obsidian') {
+      useTimeoutFn(() => {
+        variant.value = 'obsidian';
+      }, 900);
+    }
   }
 
 
@@ -865,7 +836,7 @@
             class="flex flex-col w-full gap-12 px-8 pb-2 sm:w-60vw md:w-70vw lg:justify-evenly"
           >
             <h2 class="transition-opacity transition-discrete text-center p-0 pt-6 my-25% md:my-0">
-              Tlapalli means "color" in Náhuatl
+              tlah-PAH-lee means "color" in Náhuatl
             </h2>
             <div ref="editorPreviewRef">
               <TplEditorPreview />

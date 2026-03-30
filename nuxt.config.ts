@@ -2,6 +2,9 @@
 export default defineNuxtConfig({
   nitro: {
     preset: 'cloudflare-pages',
+    prerender: {
+      routes: ['/'],
+    },
   },
 
   compatibilityDate: '2025-07-15',
@@ -11,7 +14,7 @@ export default defineNuxtConfig({
     url: process.env.NUXT_SITE_URL || 'https://tlapalli.ackzell.dev',
     name: 'Tlapalli - VSCode Theme',
     description:
-      'Tlapalli means color in Náhuatl. Monochromatic theme with colored variations. Inspired by minerals found in Mexico',
+      'Tlah-PAH-lee means color in Náhuatl. Monochromatic theme with colored variations. Inspired by minerals found in Mexico',
   },
 
   sitemap: {
@@ -22,6 +25,42 @@ export default defineNuxtConfig({
   app: {
     head: {
       title: 'Tlapalli - VSCode Theme',
+      meta: [
+        {
+          name: 'description',
+          content:
+            'Tlah-PAH-lee means color in Náhuatl. Monochromatic theme with colored variations. Inspired by minerals found in Mexico',
+        },
+        { property: 'og:type', content: 'website' },
+        { property: 'og:site_name', content: 'Tlapalli - VSCode Theme' },
+        { property: 'og:title', content: 'Tlapalli - VSCode Theme' },
+        {
+          property: 'og:description',
+          content:
+            'Tlah-PAH-lee means color in Náhuatl. Monochromatic theme with colored variations. Inspired by minerals found in Mexico',
+        },
+        {
+          property: 'og:image',
+          content: 'https://tlapalli.ackzell.dev/images/og/og.png',
+        },
+        {
+          property: 'og:image:alt',
+          content: 'VSCode screenshot with dark variations of Tlapalli theme',
+        },
+        { property: 'og:image:width', content: '1200' },
+        { property: 'og:image:height', content: '630' },
+        { name: 'twitter:card', content: 'summary_large_image' },
+        { name: 'twitter:title', content: 'Tlapalli - VSCode Theme' },
+        {
+          name: 'twitter:description',
+          content:
+            'Tlah-PAH-lee means color in Náhuatl. Monochromatic theme with colored variations. Inspired by minerals found in Mexico',
+        },
+        {
+          name: 'twitter:image',
+          content: 'https://tlapalli.ackzell.dev/images/og/og.png',
+        },
+      ],
       script: [
         {
           key: 'randomuuid-polyfill',
@@ -82,7 +121,7 @@ export default defineNuxtConfig({
   ],
 
   image: {
-    provider: 'static',
+    provider: 'none',
   },
 
   vite: {
