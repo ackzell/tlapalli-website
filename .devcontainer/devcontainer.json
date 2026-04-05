@@ -1,0 +1,47 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/javascript-node
+{
+  "name": "tlapalli-website-devcontainer",
+  // Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:4-24-trixie",
+  // "build": {
+  //   "dockerfile": "Dockerfile"
+  // },
+  "features": {
+    "ghcr.io/nils-geistmann/devcontainers-features/zsh:0": {},
+    "ghcr.io/iambipinpaul/devcontainer-features/oh-my-posh:1": {
+      "installForZsh": true
+    }
+  },
+  // Use 'forwardPorts' to make a list of ports inside the container available locally.
+  "forwardPorts": [
+    3000
+  ],
+  // Use 'postCreateCommand' to run commands after the container is created.
+  // "postCreateCommand": "ni",
+  // Configure tool-specific properties.
+  "customizations": {
+    "vscode": {
+      "oxc.fmt.configPath": ".oxfmtrc.json",
+      "editor.defaultFormatter": "oxc.oxc-vscode",
+      "editor.formatOnSave": true,
+      "editor.codeActionsOnSave": {
+        "source.fixAll.oxc": "always"
+      },
+      "[vue]": {
+        "editor.defaultFormatter": "oxc.oxc-vscode"
+      },
+      "remote.localPortHost": "allInterfaces", // exposes forwarded ports to the local network, not just localhost
+      "extensions": [
+        // omit (using "-")
+        "-dbaeumer.vscode-eslint",
+        // add (no use of "-")
+        "oxc.oxc-vscode",
+        "Vue.volar",
+        "johnsoncodehk.vue-split-editor"
+      ]
+    }
+  }
+  // Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
+  // "remoteUser": "root"
+}
