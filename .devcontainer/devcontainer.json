@@ -41,7 +41,10 @@
         "johnsoncodehk.vue-split-editor"
       ]
     }
-  }
+  },
   // Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
   // "remoteUser": "root"
+  "remoteEnv": {
+    "CLOUDFLARE_API_TOKEN": "${localEnv:CLOUDFLARE_API_TOKEN}"
+  }
 }
