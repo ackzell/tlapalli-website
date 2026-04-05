@@ -33,7 +33,7 @@
           >GET</a
         >
       </div>
-      <p class="flex flex-wrap items-center justify-center gap-4">
+      <p class="flex flex-wrap items-center justify-center gap-4 px-1">
         <a href="https://marketplace.visualstudio.com/items?itemName=ackzell.tlapalli">
           <img
             :src="`https://vsmarketplacebadges.dev/version-short/ackzell.tlapalli.jpg?style=&colorA=${logoColor(variant, 'wbg').replace('#', '')}&colorB=${logoColor(variant, 'fg').replace('#', '')}&label=version`"
