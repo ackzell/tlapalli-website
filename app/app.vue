@@ -42,6 +42,19 @@
   } = useResolvedColorMode();
 
 
+  useSchemaOrg([
+    defineProduct({
+      name: 'Tlapalli',
+      category: 'Visual Studio Code Theme',
+      description:
+        'Tlah-PAH-lee means color in Náhuatl. Monochromatic theme with colored variations. Inspired by minerals found in Mexico.',
+      image: 'https://tlapalli.ackzell.dev/images/og/og.png',
+      offers: defineOffer({ price: 0, priceCurrency: 'USD' }),
+      url: 'https://marketplace.visualstudio.com/items?itemName=ackzell.tlapalli',
+    }),
+  ]);
+
+
   // ─── Color mode badge sync ────────────────────────────────────────────────
   const osPrefersDark = ref<boolean | null>(null);
   const storedColorMode = ref<string | null>(null);

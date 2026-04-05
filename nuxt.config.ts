@@ -1,5 +1,9 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
+  routeRules: {
+    '/sitemap_index.xml': { redirect: '/sitemap.xml' },
+  },
+
   nitro: {
     preset: 'cloudflare-pages',
     prerender: {
@@ -12,14 +16,15 @@ export default defineNuxtConfig({
 
   site: {
     url: process.env.NUXT_SITE_URL || 'https://tlapalli.ackzell.dev',
-    name: 'Tlapalli - VSCode Theme',
+    name: 'Tlapalli',
     description:
       'Tlah-PAH-lee means color in Náhuatl. Monochromatic theme with colored variations. Inspired by minerals found in Mexico',
   },
 
   sitemap: {
-    // Build-time sitemap generation; removes runtime sitemap code from server bundle.
-    zeroRuntime: true,
+    sitemaps: false,
+    sitemapName: 'sitemap.xml',
+    urls: ['/'],
   },
 
   app: {
