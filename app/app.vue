@@ -12,6 +12,7 @@
   import TplStatusBar from '@/components/featureSections/TplStatusBar.vue';
   import TplVersionControl from '@/components/featureSections/TplVersionControl.vue';
   import TplVariantModeImageSwap from '@/components/shared/TplVariantModeImageSwap.vue';
+  import TplShaderBackground from '@/components/TplShaderBackground.vue';
   import { useResolvedColorMode } from '@/composables/useResolvedColorMode';
   import { useThemeVariant } from '@/composables/useThemeVariant';
   if (import.meta.client) {
@@ -59,8 +60,24 @@
 
   const surfaceClass = computed(() => {
     const mode = resolvedMode.value.toLowerCase();
-    return `bg-${variant.value}-${mode}-ui-bg text-${variant.value}-${mode}-ui-foreground`;
+    return `text-${variant.value}-${mode}-ui-foreground`;
   });
+
+
+  const bodyBackground = computed(() => {
+    const mode = resolvedMode.value.toLowerCase() as 'light' | 'dark';
+    return themePalette[variant.value][mode].ui.bg;
+  });
+
+
+  useHead(() => ({
+    style: [
+      {
+        key: 'tpl-body-background',
+        innerHTML: `body { background-color: ${bodyBackground.value}; }`,
+      },
+    ],
+  }));
 
 
   const currentBorderColor = computed(() => {
@@ -148,10 +165,8 @@
 
 <template>
   <ColorScheme tag="div" placeholder-tag="div">
-    <div
-      :class="[surfaceClass, selectionClass]"
-      :style="{ transition: 'background-color 260ms ease, color 260ms ease' }"
-    >
+    <div :class="[surfaceClass, selectionClass]" :style="{ transition: 'color 260ms ease' }">
+      <TplShaderBackground />
       <TplHeader ref="headerRef" class="opacity-0" />
 
       <div id="page" class="relative flex flex-col gap-2 p-0 m-0">
@@ -425,8 +440,8 @@
     }
 
     :deep(
-        [data-scroll-reveal][data-reveal-role='image'][data-reveal-size='tall'].activity-bar-preview-shell
-      ) {
+      [data-scroll-reveal][data-reveal-role='image'][data-reveal-size='tall'].activity-bar-preview-shell
+    ) {
       animation-range: entry 15% cover 40%;
     }
 
