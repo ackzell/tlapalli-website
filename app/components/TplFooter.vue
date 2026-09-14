@@ -36,25 +36,25 @@
       <p class="flex flex-wrap items-center justify-center gap-4 px-1">
         <a href="https://marketplace.visualstudio.com/items?itemName=ackzell.tlapalli">
           <img
-            :src="`https://vsmarketplacebadges.dev/version-short/ackzell.tlapalli.jpg?style=&colorA=${logoColor(variant, 'wbg').replace('#', '')}&colorB=${logoColor(variant, 'fg').replace('#', '')}&label=version`"
+            :src="`https://vsmarketplacebadges.dev/version-short/ackzell.tlapalli.jpg?style=&labelColor=${logoColor(variant, 'wbg').replace('#', '')}&color=${logoColor(variant, 'fg').replace('#', '')}&label=version`"
             alt="Version"
           />
         </a>
         <a href="https://marketplace.visualstudio.com/items?itemName=ackzell.tlapalli">
           <img
-            :src="`https://vsmarketplacebadges.dev/rating-short/ackzell.tlapalli.jpg?style=&colorA=${logoColor(variant, 'wbg').replace('#', '')}&colorB=${logoColor(variant, 'fg').replace('#', '')}&label=rating`"
+            :src="`https://vsmarketplacebadges.dev/rating-short/ackzell.tlapalli.jpg?style=&labelColor=${logoColor(variant, 'wbg').replace('#', '')}&color=${logoColor(variant, 'fg').replace('#', '')}&label=rating`"
             alt="Rating"
           />
         </a>
         <a href="https://marketplace.visualstudio.com/items?itemName=ackzell.tlapalli">
           <img
-            :src="`https://vsmarketplacebadges.dev/installs-short/ackzell.tlapalli.jpg?style=&colorA=${logoColor(variant, 'wbg').replace('#', '')}&colorB=${logoColor(variant, 'fg').replace('#', '')}&label=installs`"
+            :src="`https://vsmarketplacebadges.dev/installs-short/ackzell.tlapalli.jpg?style=&labelColor=${logoColor(variant, 'wbg').replace('#', '')}&color=${logoColor(variant, 'fg').replace('#', '')}&label=installs`"
             alt="Installs"
           />
         </a>
         <a href="https://marketplace.visualstudio.com/items?itemName=ackzell.tlapalli">
           <img
-            :src="`https://vsmarketplacebadges.dev/downloads-short/ackzell.tlapalli.jpg?style=&colorA=${logoColor(variant, 'wbg').replace('#', '')}&colorB=${logoColor(variant, 'fg').replace('#', '')}&label=downloads`"
+            :src="`https://vsmarketplacebadges.dev/downloads-short/ackzell.tlapalli.jpg?style=&labelColor=${logoColor(variant, 'wbg').replace('#', '')}&color=${logoColor(variant, 'fg').replace('#', '')}&label=downloads`"
             alt="Downloads"
           />
         </a>
