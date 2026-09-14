@@ -166,7 +166,8 @@
           data-scroll-reveal
           data-reveal-role="image"
           data-reveal-direction="left"
-          class="absolute left-0 top-53% w-5% activity-bar-preview-shell z-0"
+          data-reveal-size="tall"
+          class="absolute left-0 top-73% w-5% activity-bar-preview-shell z-0"
         >
           <TplVariantModeImageSwap
             image-section="activityBar"
@@ -421,6 +422,12 @@
 
     :deep([data-scroll-reveal][data-reveal-role='image'][data-reveal-size='tall']) {
       animation-range: entry 40% cover 35%;
+    }
+
+    :deep(
+        [data-scroll-reveal][data-reveal-role='image'][data-reveal-size='tall'].activity-bar-preview-shell
+      ) {
+      animation-range: entry 15% cover 40%;
     }
 
     :deep([data-scroll-reveal][data-reveal-role='footer']) {
