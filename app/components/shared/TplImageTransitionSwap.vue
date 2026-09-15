@@ -15,6 +15,8 @@
       syncToken?: number;
       syncStartedAt?: number;
       syncDuration?: number;
+      expandable?: boolean;
+      expandLabel?: string;
     }>(),
     {
       sizes: '100vw',
@@ -24,8 +26,13 @@
       syncToken: 0,
       syncStartedAt: 0,
       syncDuration: EDITOR_PREVIEW_REVEAL_DURATION,
+      expandable: false,
+      expandLabel: 'Expand preview image',
     },
   );
+
+
+  const emit = defineEmits<{ expand: [] }>();
 
 
   const source = computed(() => props.src);
@@ -67,6 +74,16 @@
         />
       </slot>
     </div>
+    <button
+      v-if="expandable"
+      type="button"
+      class="preview-expand"
+      :aria-label="expandLabel"
+      :title="expandLabel"
+      @click="emit('expand')"
+    >
+      <span class="preview-expand-icon i-mynaui:maximize" aria-hidden="true" />
+    </button>
   </div>
 </template>
 
@@ -87,6 +104,52 @@
   .preview-layer--top {
     position: absolute;
     inset: 0;
+  }
+
+  .preview-expand {
+    position: absolute;
+    right: 0.5rem;
+    bottom: 0.5rem;
+    z-index: 5;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.9rem;
+    height: 1.9rem;
+    padding: 0;
+    border: none;
+    border-radius: 9999px;
+    color: #ffffff;
+    background-color: rgb(0 0 0 / 0.45);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    cursor: pointer;
+    touch-action: manipulation;
+    opacity: 0.85;
+    transition:
+      opacity 180ms ease,
+      background-color 180ms ease,
+      transform 180ms ease;
+  }
+
+  .preview-expand:hover,
+  .preview-expand:focus-visible {
+    opacity: 1;
+    background-color: rgb(0 0 0 / 0.6);
+  }
+
+  .preview-expand:active {
+    transform: scale(0.9);
+  }
+
+  .preview-expand:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+  }
+
+  .preview-expand-icon {
+    font-size: 0.95rem;
+    line-height: 1;
   }
 
   .preview-image {

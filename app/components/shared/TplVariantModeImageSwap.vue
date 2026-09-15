@@ -1,6 +1,7 @@
 <script setup lang="ts">
-  import { computed } from 'vue';
+  import { computed, ref } from 'vue';
 
+  import TplImageLightbox from '@/components/shared/TplImageLightbox.vue';
   import TplImageTransitionSwap from '@/components/shared/TplImageTransitionSwap.vue';
   import { useResolvedColorMode } from '@/composables/useResolvedColorMode';
   import { useThemeVariant } from '@/composables/useThemeVariant';
@@ -12,11 +13,15 @@
       alt?: string;
       sizes?: string;
       densities?: string;
+      expandable?: boolean;
+      expandLabel?: string;
     }>(),
     {
       alt: undefined,
       sizes: '',
       densities: 'x1 x2',
+      expandable: true,
+      expandLabel: undefined,
     },
   );
 
@@ -35,6 +40,31 @@
       props.alt ??
       `Preview image for ${variant.value} variant in ${resolvedMode.value.toLowerCase()} mode.`,
   );
+  const expandAriaLabel = computed(() => props.expandLabel ?? `Expand ${resolvedAlt.value}`);
+
+
+  const displayVariant = computed(() =>
+    variant.value
+      .replace(/[A-Z]/g, (match) => ` ${match.toLowerCase()}`)
+      .replace(/^./, (char) => char.toUpperCase()),
+  );
+  const lightboxTitle = computed(
+    () => `${displayVariant.value} · ${resolvedMode.value.toLowerCase()}`,
+  );
+
+
+  const lightboxVisible = ref(false);
+
+
+  function openLightbox() {
+    if (!props.expandable) return;
+    lightboxVisible.value = true;
+  }
+
+
+  function closeLightbox() {
+    lightboxVisible.value = false;
+  }
 </script>
 
 <template>
@@ -46,6 +76,9 @@
     :sync-token="switchToken"
     :sync-started-at="switchStartedAt"
     :sync-duration="totalDuration"
+    :expandable="expandable"
+    :expand-label="expandAriaLabel"
+    @expand="openLightbox"
   >
     <template #image="{ src, alt: imageAlt }">
       <slot name="image" :src="src" :alt="imageAlt">
@@ -59,6 +92,15 @@
       </slot>
     </template>
   </TplImageTransitionSwap>
+
+  <TplImageLightbox
+    v-if="expandable"
+    :visible="lightboxVisible"
+    :src="resolvedSrc"
+    :alt="resolvedAlt"
+    :title="lightboxTitle"
+    @close="closeLightbox"
+  />
 </template>
 
 <style scoped>

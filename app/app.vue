@@ -191,6 +191,7 @@
             image-section="activityBar"
             alt="Preview of activity bar styling for the selected theme variant."
             sizes="sm:123px"
+            :expandable="false"
           />
         </section>
 

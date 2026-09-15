@@ -45,7 +45,7 @@
 </template>
 
 <style scoped>
-  .errors-preview-shell {
+  :deep(.preview-image) {
     -webkit-mask-image:
       linear-gradient(to top, transparent 5%, black 60%),
       linear-gradient(to right, transparent 0%, black 10%, black 93%, transparent 100%);

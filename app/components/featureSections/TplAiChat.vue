@@ -38,7 +38,9 @@
     /* transform: perspective(1200px) rotateX(45deg) rotateY(18deg) rotate(-18deg); */
     transform-origin: center center;
     will-change: transform;
+  }
 
+  :deep(.preview-image) {
     -webkit-mask-image: linear-gradient(to left, transparent 2px, black 40%);
     mask-image: linear-gradient(to left, transparent 2px, black 40%);
   }

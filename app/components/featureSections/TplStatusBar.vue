@@ -23,12 +23,10 @@
 </template>
 
 <style scoped>
-  .preview-shell {
-    -webkit-mask-image: linear-gradient(to bottom, transparent 25%, black 80%);
-    mask-image: linear-gradient(to bottom, transparent 25%, black 80%);
-  }
-
   :deep(.preview-image) {
     height: 6rem;
+
+    -webkit-mask-image: linear-gradient(to bottom, transparent 25%, black 80%);
+    mask-image: linear-gradient(to bottom, transparent 25%, black 80%);
   }
 </style>
