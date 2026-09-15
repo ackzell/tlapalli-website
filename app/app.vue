@@ -165,8 +165,11 @@
 
 <template>
   <ColorScheme tag="div" placeholder-tag="div">
-    <div :class="[surfaceClass, selectionClass]" :style="{ transition: 'color 260ms ease' }">
-      <TplShaderBackground />
+    <div
+      :class="['relative', surfaceClass, selectionClass]"
+      :style="{ transition: 'color 260ms ease' }"
+    >
+      <TplShaderBackground :revealed="showContent" />
       <TplHeader ref="headerRef" class="opacity-0" />
 
       <div id="page" class="relative flex flex-col gap-2 p-0 m-0">

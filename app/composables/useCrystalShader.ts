@@ -246,9 +246,13 @@ export const useCrystalShader = () => {
     if (!gl || !canvas.value) {
       return;
     }
+    const rect = canvas.value.getBoundingClientRect();
+    if (rect.width === 0 || rect.height === 0) {
+      return;
+    }
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    let width = Math.max(1, Math.floor(window.innerWidth * dpr * RENDER_QUALITY));
-    let height = Math.max(1, Math.floor(window.innerHeight * dpr * RENDER_QUALITY));
+    let width = Math.max(1, Math.floor(rect.width * dpr * RENDER_QUALITY));
+    let height = Math.max(1, Math.floor(rect.height * dpr * RENDER_QUALITY));
     const maxSide = Math.max(width, height);
     if (maxSide > MAX_BUFFER_DIMENSION) {
       const scale = MAX_BUFFER_DIMENSION / maxSide;
@@ -338,5 +342,6 @@ export const useCrystalShader = () => {
   return {
     canvas,
     configure,
+    resize,
   };
 };
