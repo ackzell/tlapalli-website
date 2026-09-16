@@ -9,7 +9,7 @@
   const swapRef = ref<InstanceType<typeof TplVariantModeImageSwap> | null>(null);
 
 
-  const previewAlt = computed(() => `Preview of the Tlapalli theme for ${editor.label}.`);
+  const previewAlt = computed(() => `Preview of the Tlapalli theme for ${editor.value.label}.`);
   const expandLabel = computed(() => `Expand ${previewAlt.value}`);
 
 
