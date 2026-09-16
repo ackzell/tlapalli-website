@@ -60,6 +60,7 @@
           class="preview-image"
           :sizes="sizes"
           :densities="densities"
+          format="auto"
         />
       </slot>
     </div>
@@ -71,6 +72,7 @@
           class="preview-image"
           :sizes="sizes"
           :densities="densities"
+          format="auto"
         />
       </slot>
     </div>

@@ -1,5 +1,5 @@
 type ThemeMode = {
-  // Values map to VS Code theme token origins from theme.json:
+  // Values map to VSCode theme token origins from theme.json:
   // - bg -> editor.background
   // - foreground -> foreground
   // - border -> panel.border

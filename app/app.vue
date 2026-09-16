@@ -1,9 +1,10 @@
 <script setup lang="ts">
-  import { computed, nextTick } from 'vue';
+  import { computed, nextTick, watch } from 'vue';
 
   import './styles/base.css';
   import pkg from '../package.json';
   import TplFeatureSectionWrapper from './components/featureSections/TplFeatureSectionWrapper.vue';
+  import type { SectionId } from './models/editors';
   import { themePalette } from './models/variants';
   import TplAiChat from '@/components/featureSections/TplAiChat.vue';
   import TplEditorWidgets from '@/components/featureSections/TplEditorWidgets.vue';
@@ -13,6 +14,7 @@
   import TplVersionControl from '@/components/featureSections/TplVersionControl.vue';
   import TplVariantModeImageSwap from '@/components/shared/TplVariantModeImageSwap.vue';
   import TplShaderBackground from '@/components/TplShaderBackground.vue';
+  import { useEditor } from '@/composables/useEditor';
   import { useResolvedColorMode } from '@/composables/useResolvedColorMode';
   import { useThemeVariant } from '@/composables/useThemeVariant';
   if (import.meta.client) {
@@ -27,6 +29,8 @@
 
 
   const { variant } = useThemeVariant({ defaultVariant: 'obsidian' });
+  const { editor } = useEditor({ defaultEditor: 'vscode' });
+  const hasSection = (id: SectionId) => editor.value.sections.includes(id);
   const {
     resolvedMode,
     value: colorModeValue,
@@ -37,12 +41,17 @@
   useSchemaOrg([
     defineProduct({
       name: 'Tlapalli',
-      category: 'Visual Studio Code Theme',
+      category: 'Code Editor Theme',
       description:
         'Tlah-PAH-lee means color in Náhuatl. Monochromatic theme with colored variations. Inspired by minerals found in Mexico.',
-      image: 'https://tlapalli.ackzell.dev/images/og/og.png',
+      image: 'https://tlapalli.ackzell.dev/images/vscode/og/og.png',
       offers: defineOffer({ price: 0, priceCurrency: 'USD' }),
       url: 'https://marketplace.visualstudio.com/items?itemName=ackzell.tlapalli',
+      additionalProperty: editor.value.distributions.map((distribution) => ({
+        '@type': 'PropertyValue' as const,
+        name: distribution.name,
+        value: distribution.url,
+      })),
     }),
   ]);
 
@@ -64,20 +73,23 @@
   });
 
 
-  const bodyBackground = computed(() => {
-    const mode = resolvedMode.value.toLowerCase() as 'light' | 'dark';
-    return themePalette[variant.value][mode].ui.bg;
+  useHead(() => {
+    const lightBg = themePalette[variant.value].light.ui.bg;
+    const darkBg = themePalette[variant.value].dark.ui.bg;
+    return {
+      style: [
+        {
+          key: 'tpl-body-background',
+          innerHTML: [
+            `html { background-color: ${lightBg}; }`,
+            `html.dark { background-color: ${darkBg}; }`,
+            `body { background-color: ${lightBg}; }`,
+            `html.dark body { background-color: ${darkBg}; }`,
+          ].join('\n'),
+        },
+      ],
+    };
   });
-
-
-  useHead(() => ({
-    style: [
-      {
-        key: 'tpl-body-background',
-        innerHTML: `body { background-color: ${bodyBackground.value}; }`,
-      },
-    ],
-  }));
 
 
   const currentBorderColor = computed(() => {
@@ -150,6 +162,21 @@
     if (targets.length) setupScrollRevealFallback(targets);
   }
 
+  watch(
+    () => editor.value.id,
+    async () => {
+      const previousScrollY = import.meta.client ? window.scrollY : 0;
+      await setupScrollReveals();
+      if (!import.meta.client) return;
+      const contentHeight =
+        document.getElementById('__nuxt')?.offsetHeight || document.body.offsetHeight || 0;
+      const maxScroll = Math.max(0, contentHeight - window.innerHeight);
+      if (previousScrollY > maxScroll) {
+        window.scrollTo(0, 0);
+      }
+    },
+  );
+
 
   // ─── Intro animation ──────────────────────────────────────────────────────
   const {
@@ -181,6 +208,7 @@
         />
 
         <section
+          v-if="hasSection('activityBar')"
           data-scroll-reveal
           data-reveal-role="image"
           data-reveal-direction="left"
@@ -222,7 +250,7 @@
             </div>
           </section>
 
-          <main class="flex flex-col gap-12 pb-36">
+          <main :key="editor.id" class="flex flex-col gap-12 pb-36">
             <section class="p-4 rounded-lg md:px-10% lg:border-none" data-section-reveal>
               <h2 data-scroll-reveal data-reveal-role="heading" data-reveal-style="lift-soft">
                 A monochromatic, distraction free theme
@@ -241,22 +269,27 @@
               </p>
             </section>
 
-            <TplFeatureSectionWrapper>
+            <TplFeatureSectionWrapper v-if="hasSection('errors')">
               <TplErrors />
             </TplFeatureSectionWrapper>
 
-            <TplFeatureSectionWrapper>
+            <TplFeatureSectionWrapper v-if="hasSection('versionControl')">
               <TplVersionControl />
             </TplFeatureSectionWrapper>
 
-            <div class="flex flex-col items-center justify-center gap-12 lg:gap-8 lg:flex-row">
+            <div
+              v-if="hasSection('aiChat') || hasSection('extensions')"
+              class="flex flex-col items-center justify-center gap-12 lg:gap-8 lg:flex-row"
+            >
               <section
+                v-if="hasSection('aiChat')"
                 class="flex flex-wrap items-center justify-center gap-8 p-4 rounded-lg lg:border-none"
                 data-section-reveal
               >
                 <TplAiChat />
               </section>
               <section
+                v-if="hasSection('extensions')"
                 class="flex flex-wrap items-center justify-center gap-8 p-4 rounded-lg lg:border-none"
                 data-section-reveal
               >
@@ -264,11 +297,11 @@
               </section>
             </div>
 
-            <TplFeatureSectionWrapper>
+            <TplFeatureSectionWrapper v-if="hasSection('editorWidgets')">
               <TplEditorWidgets />
             </TplFeatureSectionWrapper>
 
-            <TplFeatureSectionWrapper>
+            <TplFeatureSectionWrapper v-if="hasSection('statusBar')">
               <TplStatusBar />
             </TplFeatureSectionWrapper>
           </main>

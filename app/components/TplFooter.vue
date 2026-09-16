@@ -1,12 +1,17 @@
 <script setup lang="ts">
+  import { computed } from 'vue';
+
+  import { useEditor } from '@/composables/useEditor';
   import { useLogoColor } from '@/composables/useLogoColor';
   import { useResolvedColorMode } from '@/composables/useResolvedColorMode';
   import { useThemeVariant } from '@/composables/useThemeVariant';
 
+  import type { BadgeKind, Distribution } from '@/models/editors';
+
+  const { editor } = useEditor({ defaultEditor: 'vscode' });
   const { variant } = useThemeVariant({ defaultVariant: 'obsidian' });
   const { resolvedMode } = useResolvedColorMode();
   const { logoColor } = useLogoColor();
-
 
   const cta = computed(() => {
     const mode = resolvedMode.value.toLowerCase();
@@ -18,78 +23,77 @@
       `hover:text-${variant.value}-${mode}-ui-widgetHoverForeground`,
     ].join(' ');
   });
+
+  const marketplaceBadge = (kind: BadgeKind): { src: string; alt: string } => {
+    const route = {
+      version: 'version-short',
+      rating: 'rating-short',
+      installs: 'installs-short',
+      downloads: 'downloads-short',
+    }[kind];
+    const labelColor = logoColor(variant.value, 'wbg').replace('#', '');
+    const color = logoColor(variant.value, 'fg').replace('#', '');
+    return {
+      src: `https://vsmarketplacebadges.dev/${route}/ackzell.tlapalli.jpg?style=&labelColor=${labelColor}&color=${color}&label=${kind}`,
+      alt: kind,
+    };
+  };
+
+  const openVsxBadge = (kind: BadgeKind): { src: string; alt: string } => {
+    const route = {
+      version: 'v',
+      downloads: 'dt',
+      rating: 'rating',
+    }[kind];
+    const colorA = logoColor(variant.value, 'bg').replace('#', '');
+    const colorB = logoColor(variant.value, 'mid').replace('#', '');
+    return {
+      src: `https://img.shields.io/open-vsx/${route}/ackzell/tlapalli?style=&colorA=${colorA}&colorB=${colorB}&label=${kind}`,
+      alt: kind,
+    };
+  };
+
+  const resolveBadge = (distribution: Distribution, kind: BadgeKind) => {
+    if (distribution.badgeProvider === 'openvsx') return openVsxBadge(kind);
+    return marketplaceBadge(kind);
+  };
+
+  const distributions = computed(() =>
+    editor.value.distributions.map((distribution) => ({
+      ...distribution,
+      badges: distribution.badges.map((kind) => ({
+        href: distribution.url,
+        ...resolveBadge(distribution, kind),
+      })),
+    })),
+  );
 </script>
 
 <template>
   <footer class="flex flex-col items-center gap-8 pb-150px lg:flex-row justify-evenly">
-    <div>
+    <div v-for="distribution in distributions" :key="distribution.id">
       <div class="flex items-center justify-center gap-4">
-        <span>VSCode Marketplace</span>
+        <span>{{ distribution.name }}</span>
         <a
-          href="https://marketplace.visualstudio.com/items?itemName=ackzell.tlapalli"
+          :href="distribution.url"
           :class="cta"
           target="_blank"
           rel="noopener noreferrer"
           >GET</a
         >
       </div>
-      <p class="flex flex-wrap items-center justify-center gap-4 px-1">
-        <a href="https://marketplace.visualstudio.com/items?itemName=ackzell.tlapalli">
-          <img
-            :src="`https://vsmarketplacebadges.dev/version-short/ackzell.tlapalli.jpg?style=&labelColor=${logoColor(variant, 'wbg').replace('#', '')}&color=${logoColor(variant, 'fg').replace('#', '')}&label=version`"
-            alt="Version"
-          />
-        </a>
-        <a href="https://marketplace.visualstudio.com/items?itemName=ackzell.tlapalli">
-          <img
-            :src="`https://vsmarketplacebadges.dev/rating-short/ackzell.tlapalli.jpg?style=&labelColor=${logoColor(variant, 'wbg').replace('#', '')}&color=${logoColor(variant, 'fg').replace('#', '')}&label=rating`"
-            alt="Rating"
-          />
-        </a>
-        <a href="https://marketplace.visualstudio.com/items?itemName=ackzell.tlapalli">
-          <img
-            :src="`https://vsmarketplacebadges.dev/installs-short/ackzell.tlapalli.jpg?style=&labelColor=${logoColor(variant, 'wbg').replace('#', '')}&color=${logoColor(variant, 'fg').replace('#', '')}&label=installs`"
-            alt="Installs"
-          />
-        </a>
-        <a href="https://marketplace.visualstudio.com/items?itemName=ackzell.tlapalli">
-          <img
-            :src="`https://vsmarketplacebadges.dev/downloads-short/ackzell.tlapalli.jpg?style=&labelColor=${logoColor(variant, 'wbg').replace('#', '')}&color=${logoColor(variant, 'fg').replace('#', '')}&label=downloads`"
-            alt="Downloads"
-          />
-        </a>
-      </p>
-    </div>
-
-    <div>
-      <div class="flex items-center justify-center gap-4">
-        <span>Open VSX</span>
+      <p
+        v-if="distribution.badges.length"
+        class="flex flex-wrap items-center justify-center gap-4 px-1"
+      >
         <a
-          href="https://open-vsx.org/extension/ackzell/tlapalli"
-          :class="cta"
+          v-for="badge in distribution.badges"
+          :key="badge.alt"
+          :href="badge.href"
           target="_blank"
           rel="noopener noreferrer"
-          >GET</a
         >
-      </div>
-      <p class="flex flex-wrap items-center justify-center gap-4">
-        <a href="https://marketplace.visualstudio.com/items?itemName=ackzell.tlapalli">
-          <img
-            :src="`https://img.shields.io/open-vsx/v/ackzell/tlapalli?style=&colorA=${logoColor(variant, 'bg').replace('#', '')}&colorB=${logoColor(variant, 'mid').replace('#', '')}&label=version`"
-            alt="Version"
-          />
-        </a>
-        <a href="https://marketplace.visualstudio.com/items?itemName=ackzell.tlapalli">
-          <img
-            :src="`https://img.shields.io/open-vsx/dt/ackzell/tlapalli?style=&colorA=${logoColor(variant, 'bg').replace('#', '')}&colorB=${logoColor(variant, 'mid').replace('#', '')}&label=downloads`"
-            alt="Downloads"
-          />
-        </a>
-        <a href="https://marketplace.visualstudio.com/items?itemName=ackzell.tlapalli">
-          <img
-            :src="`https://img.shields.io/open-vsx/rating/ackzell/tlapalli?style=&colorA=${logoColor(variant, 'bg').replace('#', '')}&colorB=${logoColor(variant, 'mid').replace('#', '')}&label=rating`"
-            alt="Rating"
-          />
+          <img :src="badge.src" :alt="badge.alt" />
         </a>
       </p>
     </div>

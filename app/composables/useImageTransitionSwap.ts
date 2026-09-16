@@ -46,8 +46,13 @@ export function useImageTransitionSwap(options: UseImageTransitionSwapOptions) {
 
   const preloadImage = (src: string) =>
     new Promise<void>((resolve) => {
+      const optimizedSrc = useImage()(src, {
+        width: 2048,
+        format: 'auto',
+        quality: 85,
+      });
       const img = new Image();
-      img.src = src;
+      img.src = optimizedSrc;
       img.onload = () => resolve();
       img.onerror = () => resolve();
     });

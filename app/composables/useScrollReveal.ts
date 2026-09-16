@@ -113,6 +113,9 @@ export function useScrollReveal() {
       if (role === 'image' && !enableImageReveals) continue;
       if (role === 'paragraph' && !enableParagraphReveals) continue;
       if (role === 'generic' && !enableGenericReveals) continue;
+      if (el.classList.contains('scroll-reveal-pending') || el.classList.contains('scroll-reveal-done')) {
+        continue;
+      }
 
       const isTallImage = role === 'image' && el.dataset.revealSize === 'tall';
       const imageThreshold = isTallImage ? 0.18 : 0.62;

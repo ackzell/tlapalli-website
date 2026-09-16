@@ -3,6 +3,7 @@
 
   import TplImageLightbox from '@/components/shared/TplImageLightbox.vue';
   import TplImageTransitionSwap from '@/components/shared/TplImageTransitionSwap.vue';
+  import { useEditor } from '@/composables/useEditor';
   import { useResolvedColorMode } from '@/composables/useResolvedColorMode';
   import { useThemeVariant } from '@/composables/useThemeVariant';
   import { useVariantSwitchTimeline } from '@/composables/useVariantSwitchTimeline';
@@ -18,7 +19,7 @@
     }>(),
     {
       alt: undefined,
-      sizes: '',
+      sizes: 'sm:100vw md:100vw lg:100vw xl:80vw 2xl:70vw',
       densities: 'x1 x2',
       expandable: true,
       expandLabel: undefined,
@@ -27,13 +28,14 @@
 
 
   const { variant } = useThemeVariant({ defaultVariant: 'obsidian' });
+  const { editorId } = useEditor({ defaultEditor: 'vscode' });
   const { resolvedMode } = useResolvedColorMode();
   const { switchToken, switchStartedAt, totalDuration } = useVariantSwitchTimeline();
 
 
   const normalizedSection = computed(() => props.imageSection.replace(/^\/+|\/+$/g, ''));
   const resolvedSrc = computed(
-    () => `images/${normalizedSection.value}/${variant.value}${resolvedMode.value}.png`,
+    () => `images/${editorId.value}/${normalizedSection.value}/${variant.value}${resolvedMode.value}.png`,
   );
   const resolvedAlt = computed(
     () =>
@@ -65,42 +67,47 @@
   function closeLightbox() {
     lightboxVisible.value = false;
   }
+
+  defineExpose({ openLightbox });
 </script>
 
 <template>
-  <TplImageTransitionSwap
-    :src="resolvedSrc"
-    :alt="resolvedAlt"
-    :sizes="sizes"
-    :densities="densities"
-    :sync-token="switchToken"
-    :sync-started-at="switchStartedAt"
-    :sync-duration="totalDuration"
-    :expandable="expandable"
-    :expand-label="expandAriaLabel"
-    @expand="openLightbox"
-  >
-    <template #image="{ src, alt: imageAlt }">
-      <slot name="image" :src="src" :alt="imageAlt">
-        <NuxtImg
-          :src="src"
-          :alt="imageAlt"
-          class="preview-image"
-          :sizes="sizes"
-          :densities="densities"
-        />
-      </slot>
-    </template>
-  </TplImageTransitionSwap>
+  <div class="variant-mode-image-swap">
+    <TplImageTransitionSwap
+      :src="resolvedSrc"
+      :alt="resolvedAlt"
+      :sizes="sizes"
+      :densities="densities"
+      :sync-token="switchToken"
+      :sync-started-at="switchStartedAt"
+      :sync-duration="totalDuration"
+      :expandable="expandable"
+      :expand-label="expandAriaLabel"
+      @expand="openLightbox"
+    >
+      <template #image="{ src, alt: imageAlt }">
+        <slot name="image" :src="src" :alt="imageAlt">
+          <NuxtImg
+            :src="src"
+            :alt="imageAlt"
+            class="preview-image"
+            :sizes="sizes"
+            :densities="densities"
+            format="auto"
+          />
+        </slot>
+      </template>
+    </TplImageTransitionSwap>
 
-  <TplImageLightbox
-    v-if="expandable"
-    :visible="lightboxVisible"
-    :src="resolvedSrc"
-    :alt="resolvedAlt"
-    :title="lightboxTitle"
-    @close="closeLightbox"
-  />
+    <TplImageLightbox
+      v-if="expandable"
+      :visible="lightboxVisible"
+      :src="resolvedSrc"
+      :alt="resolvedAlt"
+      :title="lightboxTitle"
+      @close="closeLightbox"
+    />
+  </div>
 </template>
 
 <style scoped>

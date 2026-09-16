@@ -1,6 +1,7 @@
 <script setup lang="ts">
   import { themePalette } from '~/models/variants';
 
+  const { editor } = useEditor({ defaultEditor: 'vscode' });
   const { variant } = useThemeVariant({ defaultVariant: 'obsidian' });
   const { resolvedMode } = useResolvedColorMode();
 
@@ -24,9 +25,7 @@
   >
     <div class="backdrop">
       <div class="relative flex items-center justify-between p-2 m-0">
-        <h1 class="font-serif">
-          Tlapalli <small class="font-sans text-sm opacity-80">VSCode Theme</small>
-        </h1>
+        <h1 class="font-serif">Tlapalli</h1>
 
         <div
           class="pointer-events-none md:absolute md:-translate-x-1/2 md:-translate-y-1/2 md:left-1/2 md:top-1/2 w-max"
@@ -35,7 +34,7 @@
             <span
               class="absolute font-mono transition-opacity opacity-0 right-40px md:opacity-100 duration-250"
             >
-              selected:
+              current variant:
             </span>
             <div hidden absolute class="md:inline">
               <TplCurrentVariantGem />
@@ -44,7 +43,10 @@
           </div>
         </div>
 
-        <TplColorModeToggle class="pointer-events-initial" />
+        <div class="flex items-center gap-2">
+          <TplEditorSwitcher class="pointer-events-initial" />
+          <TplColorModeToggle class="pointer-events-initial" />
+        </div>
       </div>
     </div>
     <div class="backdrop-edge" :class="`${$colorMode.value}-backdrop-edge`" />

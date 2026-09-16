@@ -36,7 +36,8 @@
     if (!canvas.value) {
       return;
     }
-    const docHeight = document.body.scrollHeight || document.documentElement.scrollHeight || 0;
+    const docHeight =
+      document.body.offsetHeight || document.documentElement.clientHeight || 0;
     const nextHeight = Math.max(0, docHeight - headerOffset.value);
     if (nextHeight !== canvasHeight.value) {
       canvasHeight.value = nextHeight;

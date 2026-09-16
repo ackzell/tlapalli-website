@@ -1,4 +1,6 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+const isDev = process.env.NODE_ENV === 'development';
+
 export default defineNuxtConfig({
   routeRules: {
     '/sitemap_index.xml': { redirect: '/sitemap.xml' },
@@ -29,7 +31,7 @@ export default defineNuxtConfig({
 
   app: {
     head: {
-      title: 'Tlapalli - VSCode Theme',
+      title: 'Tlapalli - VSCode & Zed Theme',
       meta: [
         {
           name: 'description',
@@ -37,8 +39,8 @@ export default defineNuxtConfig({
             'Tlah-PAH-lee means color in Náhuatl. Monochromatic theme with colored variations. Inspired by minerals found in Mexico',
         },
         { property: 'og:type', content: 'website' },
-        { property: 'og:site_name', content: 'Tlapalli - VSCode Theme' },
-        { property: 'og:title', content: 'Tlapalli - VSCode Theme' },
+        { property: 'og:site_name', content: 'Tlapalli - VSCode & Zed Theme' },
+        { property: 'og:title', content: 'Tlapalli - VSCode & Zed Theme' },
         {
           property: 'og:description',
           content:
@@ -46,16 +48,16 @@ export default defineNuxtConfig({
         },
         {
           property: 'og:image',
-          content: 'https://tlapalli.ackzell.dev/images/og/og.png',
+          content: 'https://tlapalli.ackzell.dev/images/vscode/og/og.png',
         },
         {
           property: 'og:image:alt',
-          content: 'VSCode screenshot with dark variations of Tlapalli theme',
+          content: 'Screenshot with dark variations of the Tlapalli theme',
         },
         { property: 'og:image:width', content: '1200' },
         { property: 'og:image:height', content: '630' },
         { name: 'twitter:card', content: 'summary_large_image' },
-        { name: 'twitter:title', content: 'Tlapalli - VSCode Theme' },
+        { name: 'twitter:title', content: 'Tlapalli - VSCode & Zed Theme' },
         {
           name: 'twitter:description',
           content:
@@ -63,7 +65,7 @@ export default defineNuxtConfig({
         },
         {
           name: 'twitter:image',
-          content: 'https://tlapalli.ackzell.dev/images/og/og.png',
+          content: 'https://tlapalli.ackzell.dev/images/vscode/og/og.png',
         },
       ],
       script: [
@@ -132,7 +134,11 @@ export default defineNuxtConfig({
   ],
 
   image: {
-    provider: 'none',
+    provider: isDev ? 'ipx' : 'cloudflare',
+    quality: 85,
+    cloudflare: {
+      baseURL: '/',
+    },
   },
 
   vite: {

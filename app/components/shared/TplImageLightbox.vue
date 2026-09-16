@@ -36,6 +36,10 @@
     return {
       '--tpl-lightbox-overlay': `${ui.bg}e0`,
       '--tpl-lightbox-img-bg': ui.bg,
+      '--tpl-lightbox-img-shadow':
+        mode === 'dark'
+          ? '0 12px 48px rgb(0 0 0 / 0.5)'
+          : '0 12px 48px rgb(0 0 0 / 0.16)',
     };
   });
 
@@ -81,6 +85,7 @@
   }
 
   .vel-img {
-    background-color: var(--tpl-lightbox-img-bg, #000000);
+    background-color: var(--tpl-lightbox-img-bg, #000000) !important;
+    box-shadow: var(--tpl-lightbox-img-shadow, 0 5px 20px 2px rgb(0 0 0 / 0.7)) !important;
   }
 </style>

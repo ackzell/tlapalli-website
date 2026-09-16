@@ -47,6 +47,9 @@ export default defineConfig({
       `selection:bg-${c}-dark-logo-fg`,
       `selection:text-${c}-dark-logo-bg`,
 
+      `text-${c}-dark-ui-widgetBg`,
+      `bg-${c}-dark-ui-foreground`,
+
       `bg-${c}-light-ui-widgetBg`,
       `bg-${c}-light-ui-widgetBg/40`,
       `hover:bg-${c}-light-ui-widgetHoverBg`,
@@ -60,6 +63,9 @@ export default defineConfig({
       `border-${c}-light-ui-border`,
       `selection:bg-${c}-light-logo-fg`,
       `selection:text-${c}-light-logo-bg`,
+
+      `text-${c}-light-ui-widgetBg`,
+      `bg-${c}-light-ui-foreground`,
     ]),
   ],
   shortcuts: [
