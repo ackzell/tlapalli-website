@@ -4,6 +4,7 @@ const isDev = process.env.NODE_ENV === 'development';
 export default defineNuxtConfig({
   routeRules: {
     '/sitemap_index.xml': { redirect: '/sitemap.xml' },
+    '/badges/zed-extension.svg': { prerender: false },
   },
 
   nitro: {

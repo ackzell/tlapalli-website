@@ -15,7 +15,7 @@ export type Distribution = {
   id: string;
   name: string;
   url: string;
-  badgeProvider?: 'marketplace' | 'openvsx';
+  badgeProvider?: 'marketplace' | 'openvsx' | 'zed';
   badges: BadgeKind[];
 };
 
@@ -70,6 +70,7 @@ export const editorRegistry = {
         id: 'zed-extension',
         name: 'Zed Extensions',
         url: 'https://zed.dev/extensions/tlapalli-theme',
+        badgeProvider: 'zed',
         badges: [],
       },
     ],
