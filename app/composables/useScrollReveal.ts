@@ -14,7 +14,7 @@ export function useScrollReveal() {
     : true;
 
   const prefersReducedMotion = import.meta.client
-    ? window.matchMedia('(prefers-reduce-motion: reduce)').matches
+    ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
     : false;
 
   const useSectionRevealFallback = import.meta.client
