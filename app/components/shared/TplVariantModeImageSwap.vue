@@ -6,6 +6,12 @@
   import { useEditor } from '@/composables/useEditor';
   import { useResolvedColorMode } from '@/composables/useResolvedColorMode';
   import { useThemeVariant } from '@/composables/useThemeVariant';
+  import {
+    type VariantImageMode,
+    type VariantImageSection,
+    useVariantImage,
+    variantImagePath,
+  } from '@/composables/useVariantImage';
   import { useVariantSwitchTimeline } from '@/composables/useVariantSwitchTimeline';
 
   const props = withDefaults(
@@ -30,12 +36,23 @@
   const { variant } = useThemeVariant({ defaultVariant: 'obsidian' });
   const { editorId } = useEditor({ defaultEditor: 'vscode' });
   const { resolvedMode } = useResolvedColorMode();
+  const { variantImageSrc } = useVariantImage();
   const { switchToken, switchStartedAt, totalDuration } = useVariantSwitchTimeline();
 
 
-  const normalizedSection = computed(() => props.imageSection.replace(/^\/+|\/+$/g, ''));
-  const resolvedSrc = computed(
-    () => `images/${editorId.value}/${normalizedSection.value}/${variant.value}${resolvedMode.value}.png`,
+  const normalizedSection = computed(
+    () => props.imageSection.replace(/^\/+|\/+$/g, '') as VariantImageSection,
+  );
+  const mode = computed<VariantImageMode>(
+    () => (resolvedMode.value === 'Dark' ? 'Dark' : 'Light') as VariantImageMode,
+  );
+  // Raw path is used by the lightbox (full-resolution asset); the displayed
+  // layers use the optimized URL that the preloader also warms.
+  const rawSrc = computed(() =>
+    variantImagePath(editorId.value, normalizedSection.value, variant.value, mode.value),
+  );
+  const displaySrc = computed(() =>
+    variantImageSrc(editorId.value, normalizedSection.value, variant.value, mode.value),
   );
   const resolvedAlt = computed(
     () =>
@@ -74,7 +91,7 @@
 <template>
   <div class="variant-mode-image-swap">
     <TplImageTransitionSwap
-      :src="resolvedSrc"
+      :src="displaySrc"
       :alt="resolvedAlt"
       :sizes="sizes"
       :densities="densities"
@@ -87,14 +104,7 @@
     >
       <template #image="{ src, alt: imageAlt }">
         <slot name="image" :src="src" :alt="imageAlt">
-          <NuxtImg
-            :src="src"
-            :alt="imageAlt"
-            class="preview-image"
-            :sizes="sizes"
-            :densities="densities"
-            format="auto"
-          />
+          <img :src="src" :alt="imageAlt" class="preview-image" />
         </slot>
       </template>
     </TplImageTransitionSwap>
@@ -102,7 +112,7 @@
     <TplImageLightbox
       v-if="expandable"
       :visible="lightboxVisible"
-      :src="resolvedSrc"
+      :src="rawSrc"
       :alt="resolvedAlt"
       :title="lightboxTitle"
       @close="closeLightbox"

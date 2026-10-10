@@ -60,14 +60,7 @@
         :alt="previewAlt"
       >
         <template #image="{ src, alt }">
-          <NuxtImg
-            :src="src"
-            :alt="alt"
-            class="preview-image"
-            sizes="sm:70vw md:80vw"
-            densities="x1 x2"
-            format="auto"
-          />
+          <img :src="src" :alt="alt" class="preview-image" />
         </template>
       </TplVariantModeImageSwap>
     </div>

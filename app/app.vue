@@ -4,7 +4,6 @@
   import './styles/base.css';
   import pkg from '../package.json';
   import TplFeatureSectionWrapper from './components/featureSections/TplFeatureSectionWrapper.vue';
-  import type { SectionId } from './models/editors';
   import { themePalette } from './models/variants';
   import TplAiChat from '@/components/featureSections/TplAiChat.vue';
   import TplEditorWidgets from '@/components/featureSections/TplEditorWidgets.vue';
@@ -17,6 +16,9 @@
   import { useEditor } from '@/composables/useEditor';
   import { useResolvedColorMode } from '@/composables/useResolvedColorMode';
   import { useThemeVariant } from '@/composables/useThemeVariant';
+  import { useVariantPreload } from '@/composables/useVariantPreload';
+
+  import type { SectionId } from './models/editors';
   if (import.meta.client) {
     console.log('[DEPLOY INFO]', {
       node: typeof process !== 'undefined' ? process.version : 'browser',
@@ -29,6 +31,11 @@
 
 
   const { variant } = useThemeVariant({ defaultVariant: 'obsidian' });
+  const {
+    ready: variantsReady,
+    started: variantsStarted,
+    percent: variantsPercent,
+  } = useVariantPreload();
   const { editor } = useEditor({ defaultEditor: 'vscode' });
   const hasSection = (id: SectionId) => editor.value.sections.includes(id);
   const {
@@ -202,6 +209,9 @@
       <div id="page" class="relative flex flex-col gap-2 p-0 m-0">
         <TplMenu
           :start-menu-rotation="startMenuRotation"
+          :variants-ready="variantsReady"
+          :variants-started="variantsStarted"
+          :variants-percent="variantsPercent"
           @gems-revealed="onGemsRevealed"
           @intro-finished="onLogoIntroFinished"
           @menu-positioned="onMenuPositioned"

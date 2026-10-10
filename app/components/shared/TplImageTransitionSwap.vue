@@ -54,26 +54,12 @@
   <div ref="frameRef" class="preview-frame">
     <div :ref="(el) => setLayerRef(el, 0)" class="preview-layer">
       <slot name="image" :src="layerSrcs[0]" :alt="alt">
-        <NuxtImg
-          :src="layerSrcs[0]"
-          :alt="alt"
-          class="preview-image"
-          :sizes="sizes"
-          :densities="densities"
-          format="auto"
-        />
+        <img :src="layerSrcs[0]" :alt="alt" class="preview-image" />
       </slot>
     </div>
     <div :ref="(el) => setLayerRef(el, 1)" class="preview-layer preview-layer--top">
       <slot name="image" :src="layerSrcs[1]" :alt="alt">
-        <NuxtImg
-          :src="layerSrcs[1]"
-          :alt="alt"
-          class="preview-image"
-          :sizes="sizes"
-          :densities="densities"
-          format="auto"
-        />
+        <img :src="layerSrcs[1]" :alt="alt" class="preview-image" />
       </slot>
     </div>
     <button

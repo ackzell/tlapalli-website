@@ -2,11 +2,13 @@
   import { computed } from 'vue';
   import { useWebHaptics } from 'web-haptics/vue';
 
+  import { useVariantPreload } from '@/composables/useVariantPreload';
   import type { LogoVariant } from '@/models/variants';
 
   const { trigger } = useWebHaptics();
   const { variant } = useThemeVariant({ defaultVariant: 'obsidian' });
   const { logoColor } = useLogoColor();
+  const { ready: variantsReady } = useVariantPreload();
 
 
   const emit = defineEmits<{
@@ -15,11 +17,17 @@
 
 
   function selectVariant(v: LogoVariant) {
+    if (!variantsReady.value) {
+      return;
+    }
     emit('select-variant', v);
   }
 
 
   function onGemKeydown(event: KeyboardEvent, v: LogoVariant) {
+    if (!variantsReady.value) {
+      return;
+    }
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
       emit('select-variant', v);
@@ -170,9 +178,10 @@
         v-for="gem in satelliteGems"
         :id="gem.id"
         :key="gem.id"
-        :class="`gem gem-${gem.variant}`"
+        :class="['gem', `gem-${gem.variant}`, { 'gem-locked': !variantsReady }]"
         role="button"
-        tabindex="0"
+        :tabindex="variantsReady ? 0 : -1"
+        :aria-disabled="!variantsReady"
         @click="
           trigger();
           selectVariant(gem.variant);
@@ -223,9 +232,10 @@
         />
         <g
           id="center-gem"
-          class="gem gem-obsidian"
+          :class="['gem', 'gem-obsidian', { 'gem-locked': !variantsReady }]"
           role="button"
-          tabindex="0"
+          :tabindex="variantsReady ? 0 : -1"
+          :aria-disabled="!variantsReady"
           @click="
             trigger();
             selectVariant('obsidian');
@@ -322,5 +332,10 @@
 
   .gem:active {
     transform: scale(0.98);
+  }
+
+  .gem-locked {
+    cursor: not-allowed;
+    pointer-events: none;
   }
 </style>

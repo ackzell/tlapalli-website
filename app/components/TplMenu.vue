@@ -14,9 +14,20 @@
   const { variant, setVariant } = useThemeVariant({ defaultVariant: 'obsidian' });
 
 
-  const props = defineProps<{
-    startMenuRotation?: boolean;
-  }>();
+  const props = withDefaults(
+    defineProps<{
+      startMenuRotation?: boolean;
+      variantsReady?: boolean;
+      variantsStarted?: boolean;
+      variantsPercent?: number;
+    }>(),
+    {
+      startMenuRotation: false,
+      variantsReady: true,
+      variantsStarted: false,
+      variantsPercent: 0,
+    },
+  );
 
 
   const { trigger } = useWebHaptics();
@@ -133,6 +144,10 @@
 
 
   function rotateMenu(direction: 1 | -1) {
+    if (!props.variantsReady) {
+      return;
+    }
+
     rotationQueue.push(direction);
 
 
@@ -329,6 +344,10 @@
 
 
   function rotateToVariant(nextVariant: LogoVariant) {
+    if (!props.variantsReady) {
+      return;
+    }
+
     const targetIndex = ringVariants.indexOf(nextVariant);
     if (targetIndex < 0) {
       if (nextVariant === 'obsidian') {
@@ -425,7 +444,7 @@
       type="button"
       class="logo-rotate-button logo-rotate-button-left"
       aria-label="Rotate menu left"
-      :disabled="introInProgress"
+      :disabled="introInProgress || !variantsReady"
       @click="
         trigger();
         rotateMenu(-1);
@@ -452,7 +471,7 @@
       type="button"
       class="logo-rotate-button logo-rotate-button-right"
       aria-label="Rotate menu right"
-      :disabled="introInProgress"
+      :disabled="introInProgress || !variantsReady"
       @click="
         trigger();
         rotateMenu(1);
@@ -463,6 +482,21 @@
         transition="transform 220ms ease"
       />
     </button>
+
+    <Transition name="variant-preload-fade">
+      <div
+        v-if="variantsStarted && !variantsReady"
+        class="variant-preload"
+        role="status"
+        aria-live="polite"
+      >
+        <span class="variant-preload-label">Preparing themes</span>
+        <span class="variant-preload-percent">{{ variantsPercent }}%</span>
+        <span class="variant-preload-track">
+          <span class="variant-preload-fill" :style="{ width: `${variantsPercent}%` }" />
+        </span>
+      </div>
+    </Transition>
   </div>
 </template>
 
@@ -502,5 +536,55 @@
   .logo-rotate-button-right {
     right: 0;
     transform: translate(130%, -50%);
+  }
+
+  .variant-preload {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-bottom: 0.85rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: max-content;
+    max-width: 90vw;
+    font-size: 0.66rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0.7;
+  }
+
+  .variant-preload-percent {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .variant-preload-track {
+    display: block;
+    width: 6rem;
+    height: 2px;
+    border-radius: 9999px;
+    background: color-mix(in srgb, currentColor 25%, transparent);
+    overflow: hidden;
+  }
+
+  .variant-preload-fill {
+    display: block;
+    height: 100%;
+    background: currentColor;
+    transition: width 220ms ease;
+  }
+
+  .variant-preload-fade-enter-active,
+  .variant-preload-fade-leave-active {
+    transition: opacity 320ms ease;
+  }
+
+  .variant-preload-fade-enter-from,
+  .variant-preload-fade-leave-to {
+    opacity: 0;
   }
 </style>
