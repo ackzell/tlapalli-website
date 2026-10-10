@@ -224,7 +224,7 @@
           data-reveal-role="image"
           data-reveal-direction="left"
           data-reveal-size="tall"
-          class="absolute left-0 top-73% w-5% activity-bar-preview-shell z-0"
+          class="absolute left-0 top-73% w-16 activity-bar-preview-shell z-0"
         >
           <TplVariantModeImageSwap
             image-section="activityBar"
@@ -262,19 +262,37 @@
           </section>
 
           <main :key="editor.id" class="flex flex-col gap-12 pb-36">
-            <section class="p-4 rounded-lg md:px-10% lg:border-none" data-section-reveal>
+            <section
+              class="p-4 rounded-lg md:px-10% lg:border-none mx-auto max-w-3xl text-center"
+              data-section-reveal
+            >
               <h2 data-scroll-reveal data-reveal-role="heading" data-reveal-style="lift-soft">
                 A monochromatic, distraction free theme
               </h2>
-              <p data-scroll-reveal data-reveal-role="paragraph" data-reveal-style="lift-soft">
+              <p
+                class="mx-auto"
+                data-scroll-reveal
+                data-reveal-role="paragraph"
+                data-reveal-style="lift-soft"
+              >
                 It will allow you to focus on the coding experience and reduce the amount of things
                 trying to get your attention in the editor.
               </p>
-              <p data-scroll-reveal data-reveal-role="paragraph" data-reveal-style="lift-soft">
+              <p
+                class="mx-auto"
+                data-scroll-reveal
+                data-reveal-role="paragraph"
+                data-reveal-style="lift-soft"
+              >
                 I have personally felt less fatigued especially when using the dark modes on low
                 light conditions.
               </p>
-              <p data-scroll-reveal data-reveal-role="paragraph" data-reveal-style="lift-soft">
+              <p
+                class="mx-auto"
+                data-scroll-reveal
+                data-reveal-role="paragraph"
+                data-reveal-style="lift-soft"
+              >
                 The light themes will provide a comfortable coding experience in well-lit
                 environments.
               </p>
@@ -682,7 +700,7 @@
 
   /* ── Activity bar fade mask ── */
   .activity-bar-preview-shell {
-    max-width: 5%;
+    max-width: 4rem;
     -webkit-mask-image: linear-gradient(to top, transparent 10%, black 100%);
     mask-image: linear-gradient(to top, transparent 10%, black 100%);
   }

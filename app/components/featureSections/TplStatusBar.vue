@@ -17,12 +17,21 @@
     <TplVariantModeImageSwap
       image-section="statusBar"
       alt="Preview of status bar styling for the selected theme variant."
+      sizes="100vw"
       densities="x1 x3"
     />
   </div>
 </template>
 
 <style scoped>
+  /* The status bar strip reads best spanning the full content width, so it
+     takes its own line instead of sitting beside the text. */
+  .preview-shell {
+    width: 100%;
+    min-width: 0;
+    flex: 1 1 100%;
+  }
+
   :deep(.preview-image) {
     height: 6rem;
 
