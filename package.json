@@ -10,6 +10,7 @@
     "generate": "nuxt generate",
     "deploy": "sh -c 'export $(cat .env.local | xargs) && nuxt build && npx wrangler pages deploy dist/ --branch=main'",
     "deploy:only": "sh -c 'export $(cat .env.local | xargs) && npx wrangler pages deploy dist/ --branch=main'",
+    "deploy:preview": "sh -c 'export $(cat .env.local | xargs) && IMAGE_CDN_BASE_URL=${IMAGE_CDN_BASE_URL:-https://tlapalli.ackzell.dev/} nuxt build && npx wrangler pages deploy dist/ --project-name tlapalli-website --branch=${PREVIEW_BRANCH:-theme-preload}'",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
     "lint": "eslint .",

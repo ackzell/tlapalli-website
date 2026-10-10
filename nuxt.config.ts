@@ -138,7 +138,10 @@ export default defineNuxtConfig({
     provider: isDev ? 'ipx' : 'cloudflare',
     quality: 85,
     cloudflare: {
-      baseURL: '/',
+      // Preview deployments are served from *.pages.dev, where /cdn-cgi/image is
+      // unavailable. Setting IMAGE_CDN_BASE_URL lets a preview reuse the
+      // production zone's Image Resizing; production keeps same-origin.
+      baseURL: process.env.IMAGE_CDN_BASE_URL || '/',
     },
   },
 
