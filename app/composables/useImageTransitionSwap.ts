@@ -7,6 +7,11 @@ import type { ComponentPublicInstance, MaybeRefOrGetter, Ref } from 'vue';
 const CLIP_HIDDEN = 'polygon(50% 50%, 50% 50%, 50% 50%, 50% 50%)';
 const CLIP_VISIBLE = 'polygon(50% -90%, 260% 50%, 50% 190%, -160% 50%)';
 
+// Upper bound for waiting on the incoming layer's image. Preview images are
+// lazy-loaded and the incoming layer can be hidden or off-screen, so the load
+// event may never fire; without a cap the swap would hang on the old variant.
+const LAYER_IMAGE_LOAD_TIMEOUT = 1500;
+
 type UseImageTransitionSwapOptions = {
   source: MaybeRefOrGetter<string>;
   baseDuration?: MaybeRefOrGetter<number>;
@@ -44,19 +49,6 @@ export function useImageTransitionSwap(options: UseImageTransitionSwapOptions) {
     layerRefs[index].value = resolved as HTMLElement | null;
   };
 
-  const preloadImage = (src: string) =>
-    new Promise<void>((resolve) => {
-      const optimizedSrc = useImage()(src, {
-        width: 2048,
-        format: 'auto',
-        quality: 85,
-      });
-      const img = new Image();
-      img.src = optimizedSrc;
-      img.onload = () => resolve();
-      img.onerror = () => resolve();
-    });
-
   const waitForLayerImage = async (index: 0 | 1) => {
     await nextTick();
     const layer = layerRefs[index].value;
@@ -69,12 +61,29 @@ export function useImageTransitionSwap(options: UseImageTransitionSwapOptions) {
       return;
     }
 
+    // Force the lazy image to fetch even while the incoming layer is hidden or
+    // below the fold, otherwise the load event never fires for this swap.
+    img.loading = 'eager';
+
     if (img.complete && img.naturalWidth > 0) {
       return;
     }
 
     await new Promise<void>((resolve) => {
-      const done = () => resolve();
+      let settled = false;
+      let timeoutId: number | undefined;
+      const done = () => {
+        if (settled) {
+          return;
+        }
+        settled = true;
+        if (timeoutId !== undefined) {
+          window.clearTimeout(timeoutId);
+        }
+        resolve();
+      };
+
+      timeoutId = window.setTimeout(done, LAYER_IMAGE_LOAD_TIMEOUT);
       img.addEventListener('load', done, { once: true });
       img.addEventListener('error', done, { once: true });
     });
@@ -141,21 +150,33 @@ export function useImageTransitionSwap(options: UseImageTransitionSwapOptions) {
     });
   };
 
+  const settleLayers = () => {
+    layerRefs.forEach((layerRef, index) => {
+      const layer = layerRef.value;
+      if (!layer) {
+        return;
+      }
+      $anime.remove(layer);
+      const isActive = index === activeLayer.value;
+      layer.style.clipPath = isActive ? CLIP_VISIBLE : CLIP_HIDDEN;
+      layer.style.zIndex = isActive ? '2' : '1';
+    });
+  };
+
   if (import.meta.client) {
     watch(
       () => toValue(options.source),
       async (nextSrc) => {
+        // Always invalidate any in-flight swap first. Otherwise a slow swap for
+        // an earlier variant can finish last and reveal that outdated variant.
+        swapToken += 1;
+        const token = swapToken;
         const incomingIndex: 0 | 1 = activeLayer.value === 0 ? 1 : 0;
 
         if (nextSrc === layerSrcs.value[activeLayer.value]) {
-          return;
-        }
-
-        swapToken += 1;
-        const token = swapToken;
-
-        await preloadImage(nextSrc);
-        if (token !== swapToken) {
+          // The active layer already shows the requested image. Cancel any
+          // in-flight swap so it cannot reveal an outdated variant later.
+          settleLayers();
           return;
         }
 
