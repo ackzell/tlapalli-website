@@ -51,7 +51,7 @@
       category: 'Code Editor Theme',
       description:
         'Tlah-PAH-lee means color in Náhuatl. Monochromatic theme with colored variations. Inspired by minerals found in Mexico.',
-      image: 'https://tlapalli.ackzell.dev/images/vscode/og/og.png',
+      image: 'https://tlapalli.ackzell.dev/images/og.jpg',
       offers: defineOffer({ price: 0, priceCurrency: 'USD' }),
       url: 'https://marketplace.visualstudio.com/items?itemName=ackzell.tlapalli',
       additionalProperty: editor.value.distributions.map((distribution) => ({
@@ -168,6 +168,7 @@
     });
     if (targets.length) setupScrollRevealFallback(targets);
   }
+
 
   watch(
     () => editor.value.id,

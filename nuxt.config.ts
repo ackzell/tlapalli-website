@@ -49,7 +49,7 @@ export default defineNuxtConfig({
         },
         {
           property: 'og:image',
-          content: 'https://tlapalli.ackzell.dev/images/vscode/og/og.png',
+          content: 'https://tlapalli.ackzell.dev/images/og.jpg',
         },
         {
           property: 'og:image:alt',
@@ -66,7 +66,7 @@ export default defineNuxtConfig({
         },
         {
           name: 'twitter:image',
-          content: 'https://tlapalli.ackzell.dev/images/vscode/og/og.png',
+          content: 'https://tlapalli.ackzell.dev/images/og.jpg',
         },
       ],
       script: [
