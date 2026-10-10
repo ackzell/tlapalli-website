@@ -30,12 +30,7 @@
     </p>
   </section>
 
-  <div
-    class="errors-preview-shell"
-    data-scroll-reveal
-    data-reveal-role="image"
-    data-reveal-direction="up"
-  >
+  <div class="preview-shell" data-scroll-reveal data-reveal-role="image" data-reveal-direction="up">
     <TplVariantModeImageSwap
       image-section="errors"
       alt="Preview of error styling for the selected theme variant."

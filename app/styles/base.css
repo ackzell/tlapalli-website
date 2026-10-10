@@ -59,3 +59,12 @@ p {
   max-width: 48ch;
   text-wrap-style: pretty;
 }
+
+/* Shared shell for feature-section preview images: a capped, flexible column
+   that sits beside its text on wide layouts and stacks full-width otherwise. */
+.preview-shell {
+  width: min(100%, 720px);
+  max-width: 100%;
+  min-width: 320px;
+  flex: 1 1 320px;
+}

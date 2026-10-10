@@ -75,9 +75,7 @@ export function useScrollReveal() {
     if (roleFromData === 'generic') return 'generic';
     if (el.matches('h1, h2, h3, h4, h5, h6')) return 'heading';
     if (el.matches('p')) return 'paragraph';
-    if (
-      el.matches('img, picture, .preview-shell, .errors-preview-shell, .activity-bar-preview-shell')
-    ) {
+    if (el.matches('img, picture, .preview-shell, .activity-bar-preview-shell')) {
       return 'image';
     }
     return 'generic';
