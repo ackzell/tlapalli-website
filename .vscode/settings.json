@@ -12,4 +12,7 @@
   "[jsonc]": {
     "editor.defaultFormatter": "vscode.json-language-features"
   },
+  "window.autoDetectColorScheme": true,
+  "workbench.preferredDarkColorTheme": "Tlapalli 01: Gold",
+  "workbench.preferredLightColorTheme": "Tlapalli l-01: Gold Light"
 }
