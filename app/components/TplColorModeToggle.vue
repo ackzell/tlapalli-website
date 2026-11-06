@@ -4,6 +4,7 @@
     nextTick,
     onBeforeUnmount,
     onBeforeUpdate,
+    onMounted,
     ref,
     type ComponentPublicInstance,
   } from 'vue';
@@ -303,7 +304,9 @@
   }
 
 
-  window.addEventListener('resize', handleResize, { passive: true });
+  onMounted(() => {
+    window.addEventListener('resize', handleResize, { passive: true });
+  });
 
 
   onBeforeUnmount(() => {

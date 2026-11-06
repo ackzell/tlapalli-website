@@ -3,11 +3,13 @@
   import { useWebHaptics } from 'web-haptics/vue';
 
   import { useVariantPreload } from '@/composables/useVariantPreload';
+
   import type { LogoVariant } from '@/models/variants';
 
   const { trigger } = useWebHaptics();
   const { variant } = useThemeVariant({ defaultVariant: 'obsidian' });
   const { logoColor } = useLogoColor();
+  const { resolvedMode } = useResolvedColorMode();
   const { ready: variantsReady } = useVariantPreload();
 
 
@@ -150,7 +152,7 @@
         v-if="variant"
         :key="`frost-${variant}`"
         class="gem-frost"
-        :class="`${$colorMode.value}-frost`"
+        :class="`${resolvedMode.toLowerCase()}-frost`"
         :style="{
           clipPath: `polygon(${toPolygon(currentGem.outer)})`,
         }"
@@ -160,7 +162,7 @@
         v-if="variant"
         :key="`frost-${variant}`"
         class="gem-frost"
-        :class="`${$colorMode.value}-frost`"
+        :class="`${resolvedMode.toLowerCase()}-frost`"
         :style="{
           clipPath: `polygon(${toPolygon(currentGem.highlight)})`,
         }"

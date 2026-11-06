@@ -4,6 +4,7 @@ import {
   onBeforeUnmount,
   onMounted,
   ref,
+  watch,
   type ComponentPublicInstance,
 } from 'vue';
 
@@ -15,6 +16,14 @@ export function useIntroAnimation(variant: Ref<string>, setupScrollReveals: () =
   const isAppMounted = ref(false);
   const headerRef = ref<ComponentPublicInstance | null>(null);
   const editorPreviewRef = ref<HTMLElement | null>(null);
+
+  // The server renders the page content so crawlers can read it. The intro
+  // hides that content with CSS, and this flag adds the reveal class once the
+  // intro reaches the point where the content should appear.
+  watch(showContent, (visible) => {
+    if (!import.meta.client) return;
+    document.documentElement.classList.toggle('tpl-intro-done', visible);
+  });
 
   let headerIntroAnimation: { pause: () => void } | null = null;
   let editorPreviewAnimation: { pause: () => void } | null = null;
@@ -81,6 +90,12 @@ export function useIntroAnimation(variant: Ref<string>, setupScrollReveals: () =
 
   onMounted(() => {
     isAppMounted.value = true;
+
+    // Safety net: if the intro never completes, reveal the content anyway.
+    useTimeoutFn(() => {
+      if (!isAppMounted.value) return;
+      showContent.value = true;
+    }, 9000);
   });
 
   onBeforeUnmount(() => {

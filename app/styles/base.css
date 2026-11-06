@@ -60,6 +60,34 @@ p {
   text-wrap-style: pretty;
 }
 
+/*
+ * Intro and scroll-reveal hiding.
+ * `scripting: enabled` keeps these rules away from clients that do not run
+ * JavaScript, so the server HTML always stays readable. The intro adds
+ * `tpl-intro-done` to <html> only after the animation reaches the content.
+ */
+@media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
+  html:not(.tpl-intro-done) [data-intro-content] {
+    opacity: 0;
+  }
+
+  [data-scroll-reveal][data-reveal-role='heading']:not([data-char-split-ready='true']),
+  [data-scroll-reveal][data-reveal-role='paragraph']:not([data-word-split-ready='true']) {
+    visibility: hidden;
+  }
+}
+
+/*
+ * Mode-dependent images stay hidden until the client resolves the color mode
+ * and hydration applies it to every image source. The app removes this gate on
+ * mount, so a light server image never flashes in dark mode.
+ */
+@media (scripting: enabled) {
+  html:not(.tpl-color-ready) [data-mode-image] {
+    visibility: hidden;
+  }
+}
+
 /* Shared shell for feature-section preview images: a capped, flexible column
    that sits beside its text on wide layouts and stacks full-width otherwise. */
 .preview-shell {

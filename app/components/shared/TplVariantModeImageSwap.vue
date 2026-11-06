@@ -35,7 +35,7 @@
 
   const { variant } = useThemeVariant({ defaultVariant: 'obsidian' });
   const { editorId } = useEditor({ defaultEditor: 'vscode' });
-  const { resolvedMode } = useResolvedColorMode();
+  const { resolvedMode, isReady } = useResolvedColorMode();
   const { variantImageSrc } = useVariantImage();
   const { switchToken, switchStartedAt, totalDuration } = useVariantSwitchTimeline();
 
@@ -85,12 +85,14 @@
     lightboxVisible.value = false;
   }
 
+
   defineExpose({ openLightbox });
 </script>
 
 <template>
-  <div class="variant-mode-image-swap">
+  <div class="variant-mode-image-swap" data-mode-image>
     <TplImageTransitionSwap
+      v-if="isReady"
       :src="displaySrc"
       :alt="resolvedAlt"
       :sizes="sizes"

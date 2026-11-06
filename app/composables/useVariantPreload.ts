@@ -1,13 +1,12 @@
-import { computed, onMounted } from 'vue';
-
-import { editorList } from '~/models/editors';
-import { themePalette, type LogoVariant } from '~/models/variants';
+import { computed, onBeforeUnmount, onMounted, watch } from 'vue';
 
 import {
   type VariantImageMode,
   type VariantImageSection,
   useVariantImage,
 } from './useVariantImage';
+import { editorList } from '~/models/editors';
+import { themePalette, type LogoVariant } from '~/models/variants';
 
 import type { EditorId } from '~/models/editors';
 
@@ -34,14 +33,12 @@ function variantSections(editorId: EditorId): VariantImageSection[] {
 export function useVariantPreload() {
   const { variantImageSrc } = useVariantImage();
   const { editorId } = useEditor({ defaultEditor: 'vscode' });
-  const { resolvedMode } = useResolvedColorMode();
+  const { resolvedMode, isReady } = useResolvedColorMode();
 
   const loadedUrls = useState<Record<string, true>>(LOADED_KEY, () => ({}));
   const started = useState<boolean>(STARTED_KEY, () => false);
 
-  const mode = computed<VariantImageMode>(() =>
-    resolvedMode.value === 'Dark' ? 'Dark' : 'Light',
-  );
+  const mode = computed<VariantImageMode>(() => (resolvedMode.value === 'Dark' ? 'Dark' : 'Light'));
 
   const urlsFor = (editor: EditorId, imageMode: VariantImageMode) => {
     const urls: string[] = [];
@@ -58,9 +55,7 @@ export function useVariantPreload() {
   // rest of the variants/modes/editors keep warming in the background.
   const activeUrls = computed(() => urlsFor(editorId.value, mode.value));
   const total = computed(() => activeUrls.value.length);
-  const loaded = computed(
-    () => activeUrls.value.filter((url) => loadedUrls.value[url]).length,
-  );
+  const loaded = computed(() => activeUrls.value.filter((url) => loadedUrls.value[url]).length);
   const ready = computed(() => total.value > 0 && loaded.value >= total.value);
   const percent = computed(() =>
     total.value > 0 ? Math.min(100, Math.round((loaded.value / total.value) * 100)) : 0,
@@ -73,58 +68,80 @@ export function useVariantPreload() {
       if (started.value) {
         return;
       }
-      started.value = true;
 
-      const currentEditor = editorId.value;
-      const currentMode: VariantImageMode = resolvedMode.value === 'Dark' ? 'Dark' : 'Light';
-      const otherMode: VariantImageMode = currentMode === 'Dark' ? 'Light' : 'Dark';
-
-      // Warm the active set first, then the other color mode, then other editors.
-      const queue: string[] = [];
-      const seen = new Set<string>();
-      const enqueue = (urls: string[]) => {
-        for (const url of urls) {
-          if (seen.has(url)) {
-            continue;
-          }
-          seen.add(url);
-          queue.push(url);
-        }
-      };
-
-      enqueue(urlsFor(currentEditor, currentMode));
-      enqueue(urlsFor(currentEditor, otherMode));
-      for (const editor of editorList) {
-        if (editor.id === currentEditor) {
-          continue;
-        }
-        enqueue(urlsFor(editor.id, currentMode));
-        enqueue(urlsFor(editor.id, otherMode));
-      }
-
-      if (queue.length === 0) {
-        return;
-      }
-
-      let cursor = 0;
-      const loadNext = () => {
-        if (cursor >= queue.length) {
+      const startPreload = () => {
+        if (started.value) {
           return;
         }
-        const url = queue[cursor++];
-        const image = new Image();
-        const settle = () => {
-          loadedUrls.value[url] = true;
-          loadNext();
+        started.value = true;
+
+        const currentEditor = editorId.value;
+        const currentMode: VariantImageMode = resolvedMode.value === 'Dark' ? 'Dark' : 'Light';
+        const otherMode: VariantImageMode = currentMode === 'Dark' ? 'Light' : 'Dark';
+
+        // Warm the active set first, then the other color mode, then other editors.
+        const queue: string[] = [];
+        const seen = new Set<string>();
+        const enqueue = (urls: string[]) => {
+          for (const url of urls) {
+            if (seen.has(url)) {
+              continue;
+            }
+            seen.add(url);
+            queue.push(url);
+          }
         };
-        image.addEventListener('load', settle, { once: true });
-        image.addEventListener('error', settle, { once: true });
-        image.src = url;
+
+        enqueue(urlsFor(currentEditor, currentMode));
+        enqueue(urlsFor(currentEditor, otherMode));
+        for (const editor of editorList) {
+          if (editor.id === currentEditor) {
+            continue;
+          }
+          enqueue(urlsFor(editor.id, currentMode));
+          enqueue(urlsFor(editor.id, otherMode));
+        }
+
+        if (queue.length === 0) {
+          return;
+        }
+
+        let cursor = 0;
+        const loadNext = () => {
+          if (cursor >= queue.length) {
+            return;
+          }
+          const url = queue[cursor++];
+          const image = new Image();
+          const settle = () => {
+            loadedUrls.value[url] = true;
+            loadNext();
+          };
+          image.addEventListener('load', settle, { once: true });
+          image.addEventListener('error', settle, { once: true });
+          image.src = url;
+        };
+
+        for (let index = 0; index < PRELOAD_CONCURRENCY; index++) {
+          loadNext();
+        }
       };
 
-      for (let index = 0; index < PRELOAD_CONCURRENCY; index++) {
-        loadNext();
-      }
+      // Wait for the client to resolve the color mode before the queue starts.
+      // Otherwise the first preload pass uses the neutral hydration mode and
+      // warms the wrong image set.
+      const stop = watch(
+        isReady,
+        (readyNow) => {
+          if (!readyNow) {
+            return;
+          }
+          stop();
+          startPreload();
+        },
+        { immediate: true },
+      );
+      onBeforeUnmount(stop);
     });
   }
 

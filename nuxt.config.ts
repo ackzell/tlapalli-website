@@ -33,6 +33,8 @@ export default defineNuxtConfig({
   app: {
     head: {
       title: 'Tlapalli - VSCode & Zed Theme',
+      // The site name is already part of the title. Do not append it twice.
+      titleTemplate: '%s',
       meta: [
         {
           name: 'description',

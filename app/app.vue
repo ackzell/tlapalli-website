@@ -1,5 +1,5 @@
 <script setup lang="ts">
-  import { computed, nextTick, watch } from 'vue';
+  import { computed, nextTick, onMounted, watch } from 'vue';
 
   import './styles/base.css';
   import pkg from '../package.json';
@@ -80,9 +80,36 @@
   });
 
 
+  const LOGO_SHADES = ['bg', 'fg', 'mid', 'wbg', 'wb'] as const;
+
+
   useHead(() => {
     const lightBg = themePalette[variant.value].light.ui.bg;
     const darkBg = themePalette[variant.value].dark.ui.bg;
+
+    // Paint the surface color from CSS so the server HTML is correct before
+    // hydration. Without this the server only knows the light theme, and dark
+    // mode users would see light text until Vue takes over.
+    const surfaceColors = Object.entries(themePalette)
+      .map(([name, palette]) =>
+        [
+          `html[data-variant="${name}"] [data-tpl-surface] { color: ${palette.light.ui.foreground}; }`,
+          `html.dark[data-variant="${name}"] [data-tpl-surface] { color: ${palette.dark.ui.foreground}; }`,
+        ].join('\n'),
+      )
+      .join('\n');
+
+    // Same idea for the logo. Each SVG fill reads a custom property, so the
+    // browser paints the right shade on the first frame.
+    const logoVariables = (mode: 'light' | 'dark') =>
+      Object.entries(themePalette)
+        .map(([name, palette]) =>
+          LOGO_SHADES.map(
+            (shade) => `--tpl-logo-${name}-${shade}: ${palette[mode].logo[shade]};`,
+          ).join('\n'),
+        )
+        .join('\n');
+
     return {
       style: [
         {
@@ -92,10 +119,21 @@
             `html.dark { background-color: ${darkBg}; }`,
             `body { background-color: ${lightBg}; }`,
             `html.dark body { background-color: ${darkBg}; }`,
+            surfaceColors,
+            `html {\n${logoVariables('light')}\n}`,
+            `html.dark {\n${logoVariables('dark')}\n}`,
           ].join('\n'),
         },
       ],
     };
+  });
+
+
+  // The `tpl-color-ready` CSS gate hides mode-dependent images until hydration
+  // has applied the resolved mode to every `src`, so a light server image can
+  // never flash in dark mode.
+  onMounted(() => {
+    document.documentElement.classList.add('tpl-color-ready');
   });
 
 
@@ -199,164 +237,150 @@
 </script>
 
 <template>
-  <ColorScheme tag="div" placeholder-tag="div">
-    <div
-      :class="['relative', surfaceClass, selectionClass]"
-      :style="{ transition: 'color 260ms ease' }"
-    >
-      <TplShaderBackground :revealed="showContent" />
-      <TplHeader ref="headerRef" class="opacity-0" />
+  <div
+    data-tpl-surface
+    :class="['relative', surfaceClass, selectionClass]"
+    :style="{ transition: 'color 260ms ease' }"
+  >
+    <TplShaderBackground :revealed="showContent" />
+    <TplHeader ref="headerRef" class="opacity-0" />
 
-      <div id="page" class="relative flex flex-col gap-2 p-0 m-0">
-        <TplMenu
-          :start-menu-rotation="startMenuRotation"
-          :variants-ready="variantsReady"
-          :variants-started="variantsStarted"
-          :variants-percent="variantsPercent"
-          @gems-revealed="onGemsRevealed"
-          @intro-finished="onLogoIntroFinished"
-          @menu-positioned="onMenuPositioned"
+    <div id="page" class="relative flex flex-col gap-2 p-0 m-0">
+      <TplMenu
+        :start-menu-rotation="startMenuRotation"
+        :variants-ready="variantsReady"
+        :variants-started="variantsStarted"
+        :variants-percent="variantsPercent"
+        @gems-revealed="onGemsRevealed"
+        @intro-finished="onLogoIntroFinished"
+        @menu-positioned="onMenuPositioned"
+      />
+
+      <section
+        v-if="hasSection('activityBar')"
+        data-scroll-reveal
+        data-reveal-role="image"
+        data-reveal-direction="left"
+        data-reveal-size="tall"
+        class="absolute left-0 top-73% w-16 activity-bar-preview-shell z-0"
+      >
+        <TplVariantModeImageSwap
+          image-section="activityBar"
+          alt="Preview of activity bar styling for the selected theme variant."
+          sizes="sm:123px"
+          :expandable="false"
         />
+      </section>
 
+      <div class="flex flex-col items-center justify-center gap-12 px-12" data-intro-content>
         <section
-          v-if="hasSection('activityBar')"
-          data-scroll-reveal
-          data-reveal-role="image"
-          data-reveal-direction="left"
-          data-reveal-size="tall"
-          class="absolute left-0 top-73% w-16 activity-bar-preview-shell z-0"
+          class="flex flex-col w-full gap-12 px-8 pb-2 sm:w-60vw md:w-70vw lg:justify-evenly"
         >
-          <TplVariantModeImageSwap
-            image-section="activityBar"
-            alt="Preview of activity bar styling for the selected theme variant."
-            sizes="sm:123px"
-            :expandable="false"
-          />
+          <h2 class="transition-opacity transition-discrete text-center p-0 pt-6 my-25% md:my-0">
+            <a
+              href="https://nahuatl.wired-humanities.org/content/tlapalli"
+              target="_blank"
+              rel="noopener noreferrer"
+              >tlah-PAH-lee</a
+            >
+            means "color" in
+            <a
+              href="https://en.wikipedia.org/wiki/Nahuatl"
+              target="_blank"
+              rel="noopener noreferrer"
+              >N&aacute;huatl</a
+            >
+          </h2>
+          <div ref="editorPreviewRef">
+            <TplEditorPreview />
+          </div>
         </section>
 
-        <div
-          class="flex flex-col items-center justify-center gap-12 px-12"
-          :style="{ opacity: showContent ? 1 : 0 }"
-        >
+        <main :key="editor.id" class="flex flex-col gap-12 pb-36">
           <section
-            class="flex flex-col w-full gap-12 px-8 pb-2 sm:w-60vw md:w-70vw lg:justify-evenly"
+            class="p-4 rounded-lg md:px-10% lg:border-none mx-auto max-w-3xl text-center"
+            data-section-reveal
           >
-            <h2 class="transition-opacity transition-discrete text-center p-0 pt-6 my-25% md:my-0">
-              <a
-                href="https://nahuatl.wired-humanities.org/content/tlapalli"
-                target="_blank"
-                rel="noopener noreferrer"
-                >tlah-PAH-lee</a
-              >
-              means "color" in
-              <a
-                href="https://en.wikipedia.org/wiki/Nahuatl"
-                target="_blank"
-                rel="noopener noreferrer"
-                >N&aacute;huatl</a
-              >
+            <h2 data-scroll-reveal data-reveal-role="heading" data-reveal-style="lift-soft">
+              A monochromatic, distraction free theme
             </h2>
-            <div ref="editorPreviewRef">
-              <TplEditorPreview />
-            </div>
+            <p
+              class="mx-auto"
+              data-scroll-reveal
+              data-reveal-role="paragraph"
+              data-reveal-style="lift-soft"
+            >
+              It will allow you to focus on the coding experience and reduce the amount of things
+              trying to get your attention in the editor.
+            </p>
+            <p
+              class="mx-auto"
+              data-scroll-reveal
+              data-reveal-role="paragraph"
+              data-reveal-style="lift-soft"
+            >
+              I have personally felt less fatigued especially when using the dark modes on low light
+              conditions.
+            </p>
+            <p
+              class="mx-auto"
+              data-scroll-reveal
+              data-reveal-role="paragraph"
+              data-reveal-style="lift-soft"
+            >
+              The light themes will provide a comfortable coding experience in well-lit
+              environments.
+            </p>
           </section>
 
-          <main :key="editor.id" class="flex flex-col gap-12 pb-36">
+          <TplFeatureSectionWrapper v-if="hasSection('errors')">
+            <TplErrors />
+          </TplFeatureSectionWrapper>
+
+          <TplFeatureSectionWrapper v-if="hasSection('versionControl')">
+            <TplVersionControl />
+          </TplFeatureSectionWrapper>
+
+          <div
+            v-if="hasSection('aiChat') || hasSection('extensions')"
+            class="flex flex-col items-center justify-center gap-12 lg:gap-8 lg:flex-row"
+          >
             <section
-              class="p-4 rounded-lg md:px-10% lg:border-none mx-auto max-w-3xl text-center"
+              v-if="hasSection('aiChat')"
+              class="flex flex-wrap items-center justify-center gap-8 p-4 rounded-lg lg:border-none"
               data-section-reveal
             >
-              <h2 data-scroll-reveal data-reveal-role="heading" data-reveal-style="lift-soft">
-                A monochromatic, distraction free theme
-              </h2>
-              <p
-                class="mx-auto"
-                data-scroll-reveal
-                data-reveal-role="paragraph"
-                data-reveal-style="lift-soft"
-              >
-                It will allow you to focus on the coding experience and reduce the amount of things
-                trying to get your attention in the editor.
-              </p>
-              <p
-                class="mx-auto"
-                data-scroll-reveal
-                data-reveal-role="paragraph"
-                data-reveal-style="lift-soft"
-              >
-                I have personally felt less fatigued especially when using the dark modes on low
-                light conditions.
-              </p>
-              <p
-                class="mx-auto"
-                data-scroll-reveal
-                data-reveal-role="paragraph"
-                data-reveal-style="lift-soft"
-              >
-                The light themes will provide a comfortable coding experience in well-lit
-                environments.
-              </p>
+              <TplAiChat />
             </section>
-
-            <TplFeatureSectionWrapper v-if="hasSection('errors')">
-              <TplErrors />
-            </TplFeatureSectionWrapper>
-
-            <TplFeatureSectionWrapper v-if="hasSection('versionControl')">
-              <TplVersionControl />
-            </TplFeatureSectionWrapper>
-
-            <div
-              v-if="hasSection('aiChat') || hasSection('extensions')"
-              class="flex flex-col items-center justify-center gap-12 lg:gap-8 lg:flex-row"
+            <section
+              v-if="hasSection('extensions')"
+              class="flex flex-wrap items-center justify-center gap-8 p-4 rounded-lg lg:border-none"
+              data-section-reveal
             >
-              <section
-                v-if="hasSection('aiChat')"
-                class="flex flex-wrap items-center justify-center gap-8 p-4 rounded-lg lg:border-none"
-                data-section-reveal
-              >
-                <TplAiChat />
-              </section>
-              <section
-                v-if="hasSection('extensions')"
-                class="flex flex-wrap items-center justify-center gap-8 p-4 rounded-lg lg:border-none"
-                data-section-reveal
-              >
-                <TplExtensions />
-              </section>
-            </div>
+              <TplExtensions />
+            </section>
+          </div>
 
-            <TplFeatureSectionWrapper v-if="hasSection('editorWidgets')">
-              <TplEditorWidgets />
-            </TplFeatureSectionWrapper>
+          <TplFeatureSectionWrapper v-if="hasSection('editorWidgets')">
+            <TplEditorWidgets />
+          </TplFeatureSectionWrapper>
 
-            <TplFeatureSectionWrapper v-if="hasSection('statusBar')">
-              <TplStatusBar />
-            </TplFeatureSectionWrapper>
-          </main>
-        </div>
+          <TplFeatureSectionWrapper v-if="hasSection('statusBar')">
+            <TplStatusBar />
+          </TplFeatureSectionWrapper>
+        </main>
       </div>
-      <TplFooter
-        class="scroll-reveal"
-        data-scroll-reveal
-        data-reveal-role="footer"
-        data-reveal-style="lift-soft"
-      />
     </div>
-  </ColorScheme>
+    <TplFooter
+      class="scroll-reveal"
+      data-scroll-reveal
+      data-reveal-role="footer"
+      data-reveal-style="lift-soft"
+    />
+  </div>
 </template>
 
 <style scoped>
-  @media (prefers-reduced-motion: no-preference) {
-    :deep([data-scroll-reveal][data-reveal-role='heading']:not([data-char-split-ready='true'])) {
-      visibility: hidden;
-    }
-
-    :deep([data-scroll-reveal][data-reveal-role='paragraph']:not([data-word-split-ready='true'])) {
-      visibility: hidden;
-    }
-  }
-
   :deep(.scroll-heading-char) {
     display: inline;
     will-change: opacity, filter;

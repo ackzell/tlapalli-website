@@ -21,11 +21,14 @@
 <template>
   <header
     class="sticky top-0 z-10 px-4 py-8"
-    :class="$colorMode.value !== 'dark' ? 'scroll-shadow-header' : ''"
+    :class="resolvedMode === 'Light' ? 'scroll-shadow-header' : ''"
   >
     <div class="backdrop">
       <div class="relative flex items-center justify-between p-2 m-0">
-        <h1 class="font-serif">Tlapalli</h1>
+        <h1 class="font-serif">
+          Tlapalli
+          <span class="sr-only">— a monochromatic theme for VS Code and Zed</span>
+        </h1>
 
         <div
           class="pointer-events-none md:absolute md:-translate-x-1/2 md:-translate-y-1/2 md:left-1/2 md:top-1/2 w-max"
@@ -49,7 +52,7 @@
         </div>
       </div>
     </div>
-    <div class="backdrop-edge" :class="`${$colorMode.value}-backdrop-edge`" />
+    <div class="backdrop-edge" :class="`${resolvedMode.toLowerCase()}-backdrop-edge`" />
   </header>
 </template>
 
