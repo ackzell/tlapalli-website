@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.0.1](https://github.com/ackzell/tlapalli-website/compare/v1.0.0...v1.0.1) (2026-11-06)
+
+
+### Bug Fixes
+
+* **theme:** render full content server-side and settle color mode after hydration ([c90e909](https://github.com/ackzell/tlapalli-website/commit/c90e9098299acc30d1cf33fe590993a6f00a514f))
+
 ## 1.0.0 (2026-10-11)
 
 
