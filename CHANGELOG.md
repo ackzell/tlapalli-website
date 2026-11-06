@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.0.2](https://github.com/ackzell/tlapalli-website/compare/v1.0.1...v1.0.2) (2026-11-06)
+
+
+### Bug Fixes
+
+* **theme:** apply dark palette via CSS media query to stop the light flash ([63e205a](https://github.com/ackzell/tlapalli-website/commit/63e205aea5c54a7ca8f1447cae91351a04b8b1e9))
+
 ## [1.0.1](https://github.com/ackzell/tlapalli-website/compare/v1.0.0...v1.0.1) (2026-11-06)
 
 
