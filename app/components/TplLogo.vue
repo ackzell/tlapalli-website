@@ -9,7 +9,6 @@
   const { trigger } = useWebHaptics();
   const { variant } = useThemeVariant({ defaultVariant: 'obsidian' });
   const { logoColor } = useLogoColor();
-  const { resolvedMode } = useResolvedColorMode();
   const { ready: variantsReady } = useVariantPreload();
 
 
@@ -152,7 +151,6 @@
         v-if="variant"
         :key="`frost-${variant}`"
         class="gem-frost"
-        :class="`${resolvedMode.toLowerCase()}-frost`"
         :style="{
           clipPath: `polygon(${toPolygon(currentGem.outer)})`,
         }"
@@ -162,7 +160,6 @@
         v-if="variant"
         :key="`frost-${variant}`"
         class="gem-frost"
-        :class="`${resolvedMode.toLowerCase()}-frost`"
         :style="{
           clipPath: `polygon(${toPolygon(currentGem.highlight)})`,
         }"
@@ -292,16 +289,25 @@
   .gem-frost {
     position: absolute;
     inset: 0;
-  }
-
-  .light-frost {
     backdrop-filter: blur(3px);
     -webkit-backdrop-filter: blur(3px);
   }
 
-  .dark-frost {
+  /*
+   * Dark mode brightens the frosted glass so the gems glow against the dark
+   * background. This is keyed to the `dark` class and to the system preference,
+   * so the frost is correct on the first paint without waiting for hydration.
+   */
+  html.dark .gem-frost {
     backdrop-filter: blur(3px) brightness(3) saturate(150%);
     -webkit-backdrop-filter: blur(3px) brightness(3) saturate(150%);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    html:not(.light) .gem-frost {
+      backdrop-filter: blur(3px) brightness(3) saturate(150%);
+      -webkit-backdrop-filter: blur(3px) brightness(3) saturate(150%);
+    }
   }
 
   .tpl-logo-svg {

@@ -90,14 +90,13 @@
     // Paint the surface color from CSS so the server HTML is correct before
     // hydration. Without this the server only knows the light theme, and dark
     // mode users would see light text until Vue takes over.
-    const surfaceColors = Object.entries(themePalette)
-      .map(([name, palette]) =>
-        [
-          `html[data-variant="${name}"] [data-tpl-surface] { color: ${palette.light.ui.foreground}; }`,
-          `html.dark[data-variant="${name}"] [data-tpl-surface] { color: ${palette.dark.ui.foreground}; }`,
-        ].join('\n'),
-      )
-      .join('\n');
+    const surfaceColors = (selector: string, mode: 'light' | 'dark') =>
+      Object.entries(themePalette)
+        .map(
+          ([name, palette]) =>
+            `${selector}[data-variant="${name}"] [data-tpl-surface] { color: ${palette[mode].ui.foreground}; }`,
+        )
+        .join('\n');
 
     // Same idea for the logo. Each SVG fill reads a custom property, so the
     // browser paints the right shade on the first frame.
@@ -115,13 +114,28 @@
         {
           key: 'tpl-body-background',
           innerHTML: [
+            // Light is the server default (no class on <html>).
             `html { background-color: ${lightBg}; }`,
-            `html.dark { background-color: ${darkBg}; }`,
             `body { background-color: ${lightBg}; }`,
-            `html.dark body { background-color: ${darkBg}; }`,
-            surfaceColors,
+            surfaceColors('html', 'light'),
             `html {\n${logoVariables('light')}\n}`,
+            // Dark via the `dark` class, which the color-mode inline script
+            // adds. This works even when that script is deferred, as long as a
+            // real browser runs it.
+            `html.dark { background-color: ${darkBg}; }`,
+            `html.dark body { background-color: ${darkBg}; }`,
+            surfaceColors('html.dark', 'dark'),
             `html.dark {\n${logoVariables('dark')}\n}`,
+            // Dark via the system preference before any script runs. This is a
+            // pure-CSS path, so a system-dark visitor never sees a light flash
+            // even if Cloudflare defers the color-mode script. The `:not(.light)`
+            // guard lets an explicit light preference still win.
+            `@media (prefers-color-scheme: dark) {`,
+            `html:not(.light) { background-color: ${darkBg}; }`,
+            `html:not(.light) body { background-color: ${darkBg}; }`,
+            surfaceColors('html:not(.light)', 'dark'),
+            `html:not(.light) {\n${logoVariables('dark')}\n}`,
+            `}`,
           ].join('\n'),
         },
       ],
