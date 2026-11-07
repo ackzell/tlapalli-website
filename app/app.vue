@@ -45,6 +45,52 @@
   } = useResolvedColorMode();
 
 
+  type MarketplaceReview = {
+    author: string;
+    datePublished: string;
+    rating: number;
+    body: string;
+  };
+
+
+  type MarketplaceReviews = {
+    reviewCount: number;
+    ratingValue: number | null;
+    reviews: MarketplaceReview[];
+  };
+
+
+  const { data: reviews } = await useFetch<MarketplaceReviews>('/api/reviews');
+
+
+  const reviewCount = reviews.value?.reviewCount ?? 0;
+  const ratingValue = reviews.value?.ratingValue ?? null;
+
+
+  // Google requires real reviews for `aggregateRating` and `review`. Only emit
+  // them when the marketplace has at least one rating, so the schema never
+  // carries a fabricated value.
+  const ratingBlock =
+    ratingValue !== null && reviewCount > 0
+      ? {
+          aggregateRating: defineAggregateRating({
+            ratingValue,
+            reviewCount,
+            bestRating: 5,
+            worstRating: 1,
+          }),
+          review: (reviews.value?.reviews ?? []).map((review) =>
+            defineReview({
+              author: review.author,
+              datePublished: review.datePublished,
+              reviewRating: { '@type': 'Rating', ratingValue: review.rating },
+              reviewBody: review.body || undefined,
+            }),
+          ),
+        }
+      : {};
+
+
   useSchemaOrg([
     defineProduct({
       name: 'Tlapalli',
@@ -54,6 +100,7 @@
       image: 'https://tlapalli.ackzell.dev/images/og.jpg',
       offers: defineOffer({ price: 0, priceCurrency: 'USD' }),
       url: 'https://marketplace.visualstudio.com/items?itemName=ackzell.tlapalli',
+      ...ratingBlock,
       additionalProperty: editor.value.distributions.map((distribution) => ({
         '@type': 'PropertyValue' as const,
         name: distribution.name,
