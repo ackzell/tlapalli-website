@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.1.2](https://github.com/ackzell/tlapalli-website/compare/v1.1.1...v1.1.2) (2026-11-07)
+
+
+### Bug Fixes
+
+* **badges:** derive badge colors from theme palette instead of CSS vars ([1ca99f9](https://github.com/ackzell/tlapalli-website/commit/1ca99f9ab963bfb5e8b698a0ed646bc2e85ef9a8))
+
 ## [1.1.1](https://github.com/ackzell/tlapalli-website/compare/v1.1.0...v1.1.1) (2026-11-07)
 
 
