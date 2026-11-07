@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.1.1](https://github.com/ackzell/tlapalli-website/compare/v1.1.0...v1.1.1) (2026-11-07)
+
+
+### Bug Fixes
+
+* **seo:** resolve hydration mismatch from top-level await in schema setup ([6711256](https://github.com/ackzell/tlapalli-website/commit/67112563849da25abc439acfb386b0fb0bfc7a27))
+
 ## [1.1.0](https://github.com/ackzell/tlapalli-website/compare/v1.0.2...v1.1.0) (2026-11-07)
 
 
