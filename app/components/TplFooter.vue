@@ -2,16 +2,15 @@
   import { computed } from 'vue';
 
   import { useEditor } from '@/composables/useEditor';
-  import { useLogoColor } from '@/composables/useLogoColor';
   import { useResolvedColorMode } from '@/composables/useResolvedColorMode';
   import { useThemeVariant } from '@/composables/useThemeVariant';
 
   import type { BadgeKind, Distribution } from '@/models/editors';
+  import { themePalette, type LogoShade } from '@/models/variants';
 
   const { editor } = useEditor({ defaultEditor: 'vscode' });
   const { variant } = useThemeVariant({ defaultVariant: 'obsidian' });
   const { resolvedMode } = useResolvedColorMode();
-  const { logoColor } = useLogoColor();
 
 
   const cta = computed(() => {
@@ -26,6 +25,12 @@
   });
 
 
+  const logoHex = (shade: LogoShade): string => {
+    const mode = resolvedMode.value === 'Light' ? 'light' : 'dark';
+    return themePalette[variant.value][mode].logo[shade].replace('#', '');
+  };
+
+
   const marketplaceBadge = (kind: BadgeKind): { src: string; alt: string } => {
     const route = {
       version: 'version-short',
@@ -33,10 +38,10 @@
       installs: 'installs-short',
       downloads: 'downloads-short',
     }[kind];
-    const labelColor = logoColor(variant.value, 'wbg').replace('#', '');
-    const color = logoColor(variant.value, 'fg').replace('#', '');
+    const labelColor = logoHex('wbg');
+    const color = logoHex('fg');
     return {
-      src: `https://vsmarketplacebadges.dev/${route}/ackzell.tlapalli.jpg?style=&labelColor=${labelColor}&color=${color}&label=${kind}`,
+      src: `https://vsmarketplacebadges.dev/${route}/ackzell.tlapalli.svg?style=&labelColor=${labelColor}&color=${color}&label=${kind}`,
       alt: kind,
     };
   };
@@ -49,8 +54,8 @@
       rating: 'rating',
       installs: 'installs',
     }[kind];
-    const colorA = logoColor(variant.value, 'bg').replace('#', '');
-    const colorB = logoColor(variant.value, 'mid').replace('#', '');
+    const colorA = logoHex('bg');
+    const colorB = logoHex('mid');
     return {
       src: `https://img.shields.io/open-vsx/${route}/ackzell/tlapalli?style=&colorA=${colorA}&colorB=${colorB}&label=${kind}`,
       alt: kind,
